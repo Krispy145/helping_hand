@@ -1,0 +1,22 @@
+flavors:
+  dev:
+    app:
+        name: "Helping Hand (Dev)"
+    android:
+        applicationId: "com.helping.dev"
+    ios:
+        bundleId: "com.helping.dev"
+  stg:
+    app:
+        name: "Helping Hand (Stg)"
+    android:
+        applicationId: "com.helping.stg"
+    ios:
+        bundleId: "com.helping.stg"
+  prod:
+    app:
+        name: "Helping Hand"
+    android:
+        applicationId: "com.helping.app"
+    ios:
+        bundleId: "com.helping.app"

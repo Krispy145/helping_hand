@@ -13,6 +13,7 @@ export class PrismaUserRepository implements IUserRepository {
       data: {
         id: user.id || undefined,
         email: user.email,
+        password: user.password!, // Assume password is provided on creation
         name: user.name,
         role: user.role as Role,
       },
@@ -57,6 +58,7 @@ export class PrismaUserRepository implements IUserRepository {
     return new User({
       id: prismaUser.id,
       email: prismaUser.email,
+      password: prismaUser.password,
       name: prismaUser.name,
       role: prismaUser.role as UserRole,
       createdAt: prismaUser.createdAt,

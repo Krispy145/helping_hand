@@ -1,0 +1,12 @@
+import { AuthService } from './auth.service';
+import { LoginRequestDto } from './dto/login-request.dto';
+import { RegisterRequestDto } from './dto/register-request.dto';
+export declare class AuthController {
+    private authService;
+    constructor(authService: AuthService);
+    login(loginDto: LoginRequestDto): Promise<{
+        access_token: string;
+        user: import("../domain/entities/user.entity").User;
+    }>;
+    register(registerDto: RegisterRequestDto): Promise<import("../domain/entities/user.entity").User>;
+}

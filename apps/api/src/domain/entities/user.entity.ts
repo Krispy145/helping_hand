@@ -7,6 +7,7 @@ export enum UserRole {
 export class User {
   id: string;
   email: string;
+  password?: string;
   name?: string | null;
   role: UserRole;
   createdAt: Date;

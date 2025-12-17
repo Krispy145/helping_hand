@@ -4,19 +4,19 @@
 
 ## 1. Safety & Infrastructure (The Foundation)
 **Priority:** Critical
-- [ ] **Project Setup:**
-  - [ ] Initialize Monorepo structure (`apps/mobile`, `apps/api`, `apps/web_pulse`).
-  - [ ] Initialize Shared Packages (`packages/models`, `packages/ui`).
-  - [ ] **Shared:** Setup Slang (i18n) & ThemeExtensions in `packages/ui`.
-  - [ ] **Mobile:** Setup `flutter_flavorizr` (Dev/Stg/Prod) & `flutter_native_splash`.
+- [x] **Project Setup:**
+  - [x] Initialize Monorepo structure (`apps/mobile`, `apps/api`, `apps/web_pulse`).
+  - [x] Initialize Shared Packages (`packages/models`, `packages/ui`).
+  - [x] **Shared:** Setup Slang (i18n) & ThemeExtensions in `packages/ui`.
+  - [x] **Mobile:** Setup `flutter_flavorizr` (Dev/Stg/Prod) & `flutter_native_splash`.
   - [ ] **Mobile:** Initialize `shorebird` for OTA updates.
-  - [ ] **Mobile:** Configure `go_router` Deep Linking & FCM.
-  - [ ] **Web:** Initialize Firebase Hosting.
-  - [ ] **Backend:** Setup NestJS + Docker Compose (Postgres, Redis).
-  - [ ] **Backend:** Setup `NotificationModule` (FCM + Interface).
+  - [x] **Mobile:** Configure `go_router` Deep Linking & FCM.
+  - [x] **Web:** Initialize Firebase Hosting.
+  - [x] **Backend:** Setup NestJS + Docker Compose (Postgres, Redis).
+  - [x] **Backend:** Setup `NotificationModule` (FCM + Interface).
 - [ ] **Database & Data:**
-  - [ ] Define Prisma Schema (User, Request, Report).
-  - [ ] Setup PostGIS extension.
+  - [x] Define Prisma Schema (User, Request, Report).
+  - [ ] Setup PostGIS extension (Planned).
 - [ ] **Identity Gate:**
   - Mock "Provider" Webhook for dev.
   - User model with `verificationStatus`.
@@ -29,8 +29,10 @@
 **Priority:** High
 
 ### A. Authentication & Onboarding
-- [ ] Flutter: Login Screen (Email magic link or simple password for MVP).
-- [ ] Backend: Auth Guards (JWT + Refresh Token).
+- [x] **Frontend:** Login/Register Screens.
+- [x] **Backend:** Auth Module (JWT + Passport).
+- [x] **Shared:** Auth DTOs.
+- [x] **State:** Auth Persistence (Secure Storage).
 
 ### B. Request Lifecycle
 - [ ] **Draft Mode:** User creates request -> `status: draft`.

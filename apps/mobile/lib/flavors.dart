@@ -20,4 +20,15 @@ class F {
     }
   }
 
+  static String get apiBaseUrl {
+    switch (appFlavor) {
+      case Flavor.dev:
+        return 'http://localhost:3000';
+      case Flavor.stg:
+        return 'https://stg-api.helpinghand.com';
+      case Flavor.prod:
+        return 'https://api.helpinghand.com';
+    }
+  }
+
 }

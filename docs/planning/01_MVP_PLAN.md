@@ -37,7 +37,7 @@
 ### B. Request Lifecycle
 - [x] **Draft Mode:** User creates request -> `status: draft` (or direct submit to pending).
 - [x] **Vetting Trigger:** User submits -> `status: pending_vetting`.
-- [ ] **Automated Vetting:** Backend logic to process `pending_vetting`.
+- [x] **Automated Vetting:** Backend logic to process `pending_vetting`.
 - [ ] **Helpers View:**
   - `GET /requests/nearby` (Only returns `status: approved` & `geoHash` approx).
 - [ ] **Session Start:** Helper "Accepts" -> Session Created.

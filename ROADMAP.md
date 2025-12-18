@@ -26,8 +26,8 @@ This document tracks the high-level progress of the Helping Hand project.
     - [x] User can create a Help Request (Title, Type, Location, Urgency).
     - [x] Database Schema update (`Request` model).
 2.  **Automated Vetting (Backend)**
-    - [ ] Integration of "Vetting Guard" to filter unsafe content.
-    - [ ] Status transitions (`pending_vetting` -> `approved` / `rejected`).
+    - [x] Integration of "Vetting Guard" to filter unsafe content.
+    - [x] Status transitions (`pending_vetting` -> `approved` / `rejected`).
 3.  **Discovery (Mobile)**
     - [ ] "Helpers Nearby" feed (Geo-queries).
 

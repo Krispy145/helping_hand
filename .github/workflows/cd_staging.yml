@@ -1,0 +1,85 @@
+name: "Helping Hand CD (Staging)"
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy-android:
+    name: "Deploy Android (Beta)"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./apps/mobile/android
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies
+        working-directory: ./apps/mobile
+        run: flutter pub get
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+          working-directory: ./apps/mobile/android
+
+      # Note: Secrets must be configured in GitHub Repo Settings
+      # - name: Setup Fastlane Secrets
+      #   run: echo "${{ secrets.GOOGLE_JSON_KEY }}" > fastlane/google-play-key.json
+
+      - name: Fastlane Beta
+        uses: maierj/fastlane-action@v3.0.0
+        with:
+          lane: 'beta'
+          subdirectory: 'apps/mobile/android'
+        # env:
+        #   GOOGLE_JSON_KEY_FILE: fastlane/google-play-key.json
+
+  deploy-ios:
+    name: "Deploy iOS (TestFlight)"
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ./apps/mobile/ios
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies
+        working-directory: ./apps/mobile
+        run: flutter pub get
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+          working-directory: ./apps/mobile/ios
+
+      - name: Fastlane Beta
+        uses: maierj/fastlane-action@v3.0.0
+        with:
+          lane: 'beta'
+          subdirectory: 'apps/mobile/ios'
+        # env:
+        #   MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+        #   FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_Apple_APP_SPECIFIC_PASSWORD }}

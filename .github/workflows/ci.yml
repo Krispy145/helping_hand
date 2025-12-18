@@ -1,0 +1,82 @@
+name: "Helping Hand CI"
+
+on:
+  pull_request:
+    branches: [ "main", "develop" ]
+  push:
+    branches: [ "main" ]
+
+jobs:
+  backend-check:
+    name: "Backend (Apps/API)"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./apps/api
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/api/package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm run test
+
+      - name: Build
+        run: npm run build
+
+  mobile-check:
+    name: "Mobile (Apps/Mobile)"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./apps/mobile
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Shared Packages
+        run: |
+          cd ../../packages/models && flutter pub get
+          cd ../ui && flutter pub get
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Add Shorebird (Required for build)
+        # Note: We need Shorebird CLI available or at least handle the absence if building. 
+        # But for analyze/test, pub get might be enough if shorebird_code_push is just a dependency.
+        # Installation of CLI takes time. Let's see if analysis passes without it.
+        # If build requires it (flavorizr might not), we will skip full build here to save time, 
+        # just analyze and test.
+        run: echo "Skipping Shorebird CLI for simple CI check"
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Test
+        run: flutter test

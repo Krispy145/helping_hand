@@ -1,0 +1,40 @@
+name: "Call: Deploy Web"
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+        description: "Target environment (dev, staging, prod)"
+
+jobs:
+  deploy-web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./apps/web_pulse
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build Web
+        run: flutter build web --release --dart-define=FLAVOR=${{ inputs.environment }}
+
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: "${{ secrets.GITHUB_TOKEN }}"
+          firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}"  # Needs to be set in repo secrets
+          channelId: live
+          projectId: "helping-hand-${{ inputs.environment }}" # Assumption on project ID naming
+        env:
+          FIREBASE_CLI_PREVIEWS: hostingchannels

@@ -1,0 +1,2 @@
+json_key_file("fastlane/google-play-key.json") # Path to the json secret file
+package_name("com.helping.app") # Your package name

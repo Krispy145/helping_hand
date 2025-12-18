@@ -29,7 +29,16 @@ This document tracks the high-level progress of the Helping Hand project.
     - [x] Integration of "Vetting Guard" to filter unsafe content.
     - [x] Status transitions (`pending_vetting` -> `approved` / `rejected`).
 3.  **Discovery (Mobile)**
-    - [ ] "Helpers Nearby" feed (Geo-queries).
+    - [x] "Helpers Nearby" feed (Geo-queries).
+
+## Phase 2: Refinement & Testing (v0.x.x)
+- [ ] **Code Quality**:
+    - [ ] Resolved all Lint Warnings (BE/FE).
+    - [ ] `flutter analyze` passing.
+- [ ] **Testing Strategy**:
+    - [ ] Unit Tests for Auto-Vetting (Done).
+    - [ ] Integration Tests for Auth & Requests.
+    - [ ] Widget Tests for Core Screens.
 
 ---
 

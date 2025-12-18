@@ -1,0 +1,27 @@
+{
+  "[dart]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit",
+      "source.organizeImports": "always"
+    },
+    "editor.rulers": [200],
+    "editor.selectionHighlight": false,
+    "editor.suggest.snippetsPreventQuickSuggestions": false,
+    "editor.suggestSelection": "first",
+    "editor.tabCompletion": "onlySnippets",
+    "editor.wordBasedSuggestions": "off"
+  },
+  "dart.lineLength": 200,
+  "dart.warnWhenEditingFilesOutsideWorkspace": false,
+  "dart.renameFilesWithClasses": "prompt",
+  "dart.previewFlutterUiGuides": true,  
+  "editor.bracketPairColorization.enabled": true,
+  "editor.inlineSuggest.enabled": true,
+  "editor.formatOnSave": true,
+  "explorer.fileNesting.patterns": {
+    "*.dart": "${capture}.g.dart,${capture}.mapper.dart"
+  },
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.expand": false,
+  "files.trimTrailingWhitespace": false
+}

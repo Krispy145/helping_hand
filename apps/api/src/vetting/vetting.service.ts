@@ -5,7 +5,7 @@ import { RequestStatus } from '@prisma/client';
 @Injectable()
 export class VettingService {
   private readonly logger = new Logger(VettingService.name);
-  
+
   // Basic list of restricted keywords for MVP
   private readonly restrictedKeywords = [
     'scam',
@@ -22,17 +22,17 @@ export class VettingService {
 
   async vetRequest(requestId: string, textToVet: string): Promise<void> {
     this.logger.log(`Vetting request ${requestId}`);
-    
+
     // Normalize text (lowercase)
     const normalizedText = textToVet.toLowerCase();
-    
+
     // Check for restricted keywords
-    const hasRestrictedContent = this.restrictedKeywords.some((keyword) => 
-      normalizedText.includes(keyword)
+    const hasRestrictedContent = this.restrictedKeywords.some((keyword) =>
+      normalizedText.includes(keyword),
     );
 
-    const newStatus = hasRestrictedContent 
-      ? RequestStatus.REJECTED 
+    const newStatus = hasRestrictedContent
+      ? RequestStatus.REJECTED
       : RequestStatus.APPROVED;
 
     // Update Request Status
@@ -42,7 +42,7 @@ export class VettingService {
     });
 
     this.logger.log(
-      `Request ${requestId} vetted. Status: ${newStatus} ${hasRestrictedContent ? '(Restricted content found)' : ''}`
+      `Request ${requestId} vetted. Status: ${newStatus} ${hasRestrictedContent ? '(Restricted content found)' : ''}`,
     );
   }
 }

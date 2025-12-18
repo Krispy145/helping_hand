@@ -42,7 +42,7 @@ __decorate([
     __metadata("design:type", Number)
 ], CreateRequestDto.prototype, "lat", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: -74.0060, required: false }),
+    (0, swagger_1.ApiProperty)({ example: -74.006, required: false }),
     __metadata("design:type", Number)
 ], CreateRequestDto.prototype, "lng", void 0);
 //# sourceMappingURL=create-request.dto.js.map

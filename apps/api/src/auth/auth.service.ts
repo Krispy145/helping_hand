@@ -1,9 +1,8 @@
-import { Injectable, Inject, UnauthorizedException, ConflictException } from '@nestjs/common';
+import { Injectable, Inject, ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import type { IUserRepository } from '../domain/repositories/user.repository.interface';
 import { User, UserRole } from '../domain/entities/user.entity';
-import { LoginRequestDto } from './dto/login-request.dto';
 import { RegisterRequestDto } from './dto/register-request.dto';
 
 @Injectable()
@@ -20,7 +19,7 @@ export class AuthService {
       if (isMatch) {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { password, ...result } = user;
-        return new User(result); // Return user without password
+        return result as User; // Return user without password
       }
     }
     return null;
@@ -29,8 +28,12 @@ export class AuthService {
   async login(user: User) {
     const payload = { email: user.email, sub: user.id, role: user.role };
     return {
-      access_token: this.jwtService.sign(payload),
-      user: user,
+      access_token: await this.jwtService.signAsync(payload),
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      },
     };
   }
 

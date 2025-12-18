@@ -45,7 +45,11 @@ export class RequestsService {
     });
   }
 
-  async findAllNearby(lat: number, lng: number, radiusInKm: number): Promise<Request[]> {
+  async findAllNearby(
+    lat: number,
+    lng: number,
+    radiusInKm: number,
+  ): Promise<Request[]> {
     // Raw SQL for Haversine formula
     // Note: This assumes latitude/longitude columns are named 'lat' and 'lng' in the 'Request' table.
     // Prisma models map to database tables, usually pascal case model -> pascal case or lowercase table depending on config.

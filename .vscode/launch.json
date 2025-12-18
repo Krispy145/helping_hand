@@ -1,0 +1,77 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Mobile (Dev)",
+      "request": "launch",
+      "type": "dart",
+      "program": "apps/mobile/lib/main.dart",
+      "args": [
+        "--flavor", "dev",
+        "--dart-define", "FLAVOR=dev"
+      ]
+    },
+    {
+      "name": "Mobile (Staging)",
+      "request": "launch",
+      "type": "dart",
+      "program": "apps/mobile/lib/main.dart",
+      "args": [
+        "--flavor", "stg",
+        "--dart-define", "FLAVOR=stg"
+      ]
+    },
+    {
+      "name": "Mobile (Prod)",
+      "request": "launch",
+      "type": "dart",
+      "program": "apps/mobile/lib/main.dart",
+      "args": [
+        "--flavor", "prod",
+        "--dart-define", "FLAVOR=prod"
+      ]
+    },
+    {
+      "name": "Mobile (Profile Mode) (Dev)",
+      "request": "launch",
+      "type": "dart",
+      "program": "apps/mobile/lib/main.dart",
+      "flutterMode": "profile",
+      "args": [
+        "--flavor", "dev",
+        "--dart-define", "FLAVOR=dev"
+      ]
+    },
+    {
+      "name": "Mobile (Release Mode) (Dev)",
+      "request": "launch",
+      "type": "dart",
+      "program": "apps/mobile/lib/main.dart",
+      "flutterMode": "release",
+      "args": [
+        "--flavor", "dev",
+        "--dart-define", "FLAVOR=dev"
+      ]
+    },
+    {
+      "name": "Web Pulse",
+      "request": "launch",
+      "type": "dart",
+      "program": "apps/web_pulse/lib/main.dart",
+      "args": [
+        "-d", "chrome",
+        "--web-port", "8080"
+      ]
+    },
+    {
+      "name": "API (Debug)",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start:debug"],
+      "cwd": "${workspaceFolder}/apps/api",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    }
+  ]
+}

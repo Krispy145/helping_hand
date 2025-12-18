@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 import { Test, TestingModule } from '@nestjs/testing';
 import { VettingService } from './vetting.service';
 import { PrismaService } from '../infrastructure/persistence/prisma/prisma.service';

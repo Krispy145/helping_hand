@@ -1,7 +1,20 @@
-import { Controller, Get, Post, Body, UseGuards, Request, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  UseGuards,
+  Request,
+  Query,
+} from '@nestjs/common';
 import { RequestsService } from './requests.service';
 import { CreateRequestDto } from './dto/create-request.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('requests')
@@ -15,7 +28,10 @@ export class RequestsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a help request' })
   @ApiResponse({ status: 201, description: 'Request created successfully' })
-  async create(@Request() req: any, @Body() createRequestDto: CreateRequestDto) {
+  async create(
+    @Request() req: { user: { userId: string } },
+    @Body() createRequestDto: CreateRequestDto,
+  ) {
     return this.requestsService.create(req.user.userId, createRequestDto);
   }
 
@@ -34,9 +50,9 @@ export class RequestsController {
     const radiusNum = parseFloat(radius) || 10; // Default 10km bounds
 
     if (isNaN(latNum) || isNaN(lngNum)) {
-       // Return empty or throw error?
-       // For now throw simplistic error
-       throw new Error('Invalid coordinates'); 
+      // Return empty or throw error?
+      // For now throw simplistic error
+      throw new Error('Invalid coordinates');
     }
 
     return this.requestsService.findAllNearby(latNum, lngNum, radiusNum);

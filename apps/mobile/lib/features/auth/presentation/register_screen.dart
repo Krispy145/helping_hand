@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../providers/auth_provider.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -24,17 +25,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     super.dispose();
   }
 
-  void _submit() async {
+  Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
-      await ref.read(authProvider.notifier).register(
-            _emailController.text,
-            _passwordController.text,
-            _nameController.text,
-          );
-      
+      await ref.read(authProvider.notifier).register(_emailController.text, _passwordController.text, _nameController.text);
+
       if (mounted && ref.read(authProvider).hasValue && ref.read(authProvider).value != null) {
         // Navigate to home
-        context.go('/'); 
+        context.go('/');
       }
     }
   }
@@ -45,16 +42,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     ref.listen(authProvider, (previous, next) {
       if (next.hasError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${next.error}')),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: ${next.error}')));
       }
     });
 
     return Scaffold(
       appBar: AppBar(title: const Text('Register')),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: Column(
@@ -79,13 +74,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 validator: (value) => value == null || value.isEmpty ? 'Required' : null,
               ),
               const SizedBox(height: 24),
-              if (authState.isLoading)
-                const CircularProgressIndicator()
-              else
-                ElevatedButton(
-                  onPressed: _submit,
-                  child: const Text('Register'),
-                ),
+              if (authState.isLoading) const CircularProgressIndicator() else ElevatedButton(onPressed: _submit, child: const Text('Register')),
             ],
           ),
         ),

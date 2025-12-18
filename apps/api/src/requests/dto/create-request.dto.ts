@@ -17,6 +17,6 @@ export class CreateRequestDto {
   @ApiProperty({ example: 40.7128, required: false })
   lat?: number;
 
-  @ApiProperty({ example: -74.0060, required: false })
+  @ApiProperty({ example: -74.006, required: false })
   lng?: number;
 }

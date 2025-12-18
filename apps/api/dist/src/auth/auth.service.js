@@ -63,7 +63,7 @@ let AuthService = class AuthService {
             const isMatch = await bcrypt.compare(pass, user.password);
             if (isMatch) {
                 const { password, ...result } = user;
-                return new user_entity_1.User(result);
+                return result;
             }
         }
         return null;
@@ -71,8 +71,12 @@ let AuthService = class AuthService {
     async login(user) {
         const payload = { email: user.email, sub: user.id, role: user.role };
         return {
-            access_token: this.jwtService.sign(payload),
-            user: user,
+            access_token: await this.jwtService.signAsync(payload),
+            user: {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+            },
         };
     }
     async register(dto) {

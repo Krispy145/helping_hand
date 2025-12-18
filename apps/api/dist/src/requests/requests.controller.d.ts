@@ -3,7 +3,11 @@ import { CreateRequestDto } from './dto/create-request.dto';
 export declare class RequestsController {
     private readonly requestsService;
     constructor(requestsService: RequestsService);
-    create(req: any, createRequestDto: CreateRequestDto): Promise<{
+    create(req: {
+        user: {
+            userId: string;
+        };
+    }, createRequestDto: CreateRequestDto): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;

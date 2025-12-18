@@ -7,3 +7,4 @@ export 'src/models_base.dart';
 export 'src/auth/auth_requests.dart';
 export 'src/auth/auth_responses.dart';
 export 'src/user/user_dto.dart';
+export 'src/requests/request_dto.dart';

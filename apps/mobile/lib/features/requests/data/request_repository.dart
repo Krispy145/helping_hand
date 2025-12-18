@@ -28,4 +28,26 @@ class RequestRepository {
       rethrow;
     }
   }
+
+  Future<List<RequestDto>> getNearbyRequests({
+    double lat = 40.7128,
+    double lng = -74.0060,
+    double radius = 10,
+  }) async {
+    try {
+      final response = await _dio.get(
+        '/requests/nearby',
+        queryParameters: {
+          'lat': lat,
+          'lng': lng,
+          'radius': radius,
+        },
+      );
+      // Depending on API, response.data could be List<dynamic>
+      final list = response.data as List;
+      return list.map((e) => RequestDtoMapper.fromMap(e)).toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

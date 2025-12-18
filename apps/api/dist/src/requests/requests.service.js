@@ -47,6 +47,17 @@ let RequestsService = class RequestsService {
             orderBy: { createdAt: 'desc' },
         });
     }
+    async findAllNearby(lat, lng, radiusInKm) {
+        const result = await this.prisma.$queryRaw `
+      SELECT *, 
+      ( 6371 * acos( cos( radians(${lat}) ) * cos( radians( lat ) ) * cos( radians( lng ) - radians(${lng}) ) + sin( radians(${lat}) ) * sin( radians( lat ) ) ) ) AS distance 
+      FROM "Request"
+      WHERE status = 'APPROVED'
+      AND ( 6371 * acos( cos( radians(${lat}) ) * cos( radians( lat ) ) * cos( radians( lng ) - radians(${lng}) ) + sin( radians(${lat}) ) * sin( radians( lat ) ) ) ) < ${radiusInKm}
+      ORDER BY distance ASC
+    `;
+        return result;
+    }
 };
 exports.RequestsService = RequestsService;
 exports.RequestsService = RequestsService = __decorate([

@@ -23,10 +23,19 @@ let RequestsController = class RequestsController {
     constructor(requestsService) {
         this.requestsService = requestsService;
     }
-    async create(req, createDto) {
-        return this.requestsService.create(req.user.userId, createDto);
+    async create(req, createRequestDto) {
+        return this.requestsService.create(req.user.userId, createRequestDto);
     }
-    async findAll() {
+    async findNearby(lat, lng, radius) {
+        const latNum = parseFloat(lat);
+        const lngNum = parseFloat(lng);
+        const radiusNum = parseFloat(radius) || 10;
+        if (isNaN(latNum) || isNaN(lngNum)) {
+            throw new Error('Invalid coordinates');
+        }
+        return this.requestsService.findAllNearby(latNum, lngNum, radiusNum);
+    }
+    findAll() {
         return this.requestsService.findAll();
     }
 };
@@ -34,6 +43,7 @@ exports.RequestsController = RequestsController;
 __decorate([
     (0, common_1.Post)(),
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: 'Create a help request' }),
     (0, swagger_1.ApiResponse)({ status: 201, description: 'Request created successfully' }),
     __param(0, (0, common_1.Request)()),
@@ -43,11 +53,24 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], RequestsController.prototype, "create", null);
 __decorate([
+    (0, common_1.Get)('nearby'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
+    (0, swagger_1.ApiOperation)({ summary: 'Find nearby requests' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'List of nearby requests' }),
+    __param(0, (0, common_1.Query)('lat')),
+    __param(1, (0, common_1.Query)('lng')),
+    __param(2, (0, common_1.Query)('radius')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:returntype", Promise)
+], RequestsController.prototype, "findNearby", null);
+__decorate([
     (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: 'List all requests (Debug)' }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
+    __metadata("design:returntype", void 0)
 ], RequestsController.prototype, "findAll", null);
 exports.RequestsController = RequestsController = __decorate([
     (0, swagger_1.ApiTags)('requests'),

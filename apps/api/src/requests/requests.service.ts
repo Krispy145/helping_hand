@@ -44,4 +44,29 @@ export class RequestsService {
       orderBy: { createdAt: 'desc' },
     });
   }
+
+  async findAllNearby(lat: number, lng: number, radiusInKm: number): Promise<Request[]> {
+    // Raw SQL for Haversine formula
+    // Note: This assumes latitude/longitude columns are named 'lat' and 'lng' in the 'Request' table.
+    // Prisma models map to database tables, usually pascal case model -> pascal case or lowercase table depending on config.
+    // Default prisma naming: Model 'Request' -> Table 'Request' (or 'requests' if map set?)
+    // Checking schema.prisma... it didn't specify @@map, so it's 'Request'.
+    // However, raw queries return raw objects, may need casting.
+
+    const result = await this.prisma.$queryRaw<Request[]>`
+      SELECT *, 
+      ( 6371 * acos( cos( radians(${lat}) ) * cos( radians( lat ) ) * cos( radians( lng ) - radians(${lng}) ) + sin( radians(${lat}) ) * sin( radians( lat ) ) ) ) AS distance 
+      FROM "Request"
+      WHERE status = 'APPROVED'
+      AND ( 6371 * acos( cos( radians(${lat}) ) * cos( radians( lat ) ) * cos( radians( lng ) - radians(${lng}) ) + sin( radians(${lat}) ) * sin( radians( lat ) ) ) ) < ${radiusInKm}
+      ORDER BY distance ASC
+    `;
+
+    // Manually fetch relations if needed, or just return the raw data.
+    // Raw query doesn't include relations by default.
+    // For MVP feed, we might want user info.
+    // We can fetch user in a separate query or join.
+    // Let's keep it simple: just list requests first.
+    return result;
+  }
 }

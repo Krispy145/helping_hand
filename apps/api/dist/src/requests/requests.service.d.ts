@@ -8,4 +8,5 @@ export declare class RequestsService {
     constructor(prisma: PrismaService, eventEmitter: EventEmitter2);
     create(userId: string, dto: CreateRequestDto): Promise<Request>;
     findAll(): Promise<Request[]>;
+    findAllNearby(lat: number, lng: number, radiusInKm: number): Promise<Request[]>;
 }

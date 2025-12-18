@@ -3,7 +3,9 @@ import * as admin from 'firebase-admin';
 import { INotificationService } from '../../domain/services/notification.service.interface';
 
 @Injectable()
-export class FcmNotificationService implements INotificationService, OnModuleInit {
+export class FcmNotificationService
+  implements INotificationService, OnModuleInit
+{
   private readonly logger = new Logger(FcmNotificationService.name);
 
   onModuleInit() {
@@ -14,12 +16,20 @@ export class FcmNotificationService implements INotificationService, OnModuleIni
         });
         this.logger.log('Firebase Admin Initialized');
       } catch (error) {
-        this.logger.warn('Firebase Admin initialization failed (likely no credentials provided for local dev). Notifications will not be sent.', error);
+        this.logger.warn(
+          'Firebase Admin initialization failed (likely no credentials provided for local dev). Notifications will not be sent.',
+          error,
+        );
       }
     }
   }
 
-  async send(tokens: string[], title: string, body: string, data?: Record<string, string>): Promise<void> {
+  async send(
+    tokens: string[],
+    title: string,
+    body: string,
+    data?: Record<string, string>,
+  ): Promise<void> {
     if (tokens.length === 0) return;
 
     try {
@@ -31,7 +41,9 @@ export class FcmNotificationService implements INotificationService, OnModuleIni
         },
         data,
       });
-      this.logger.log(`Sent notification to ${response.successCount} devices. Failed: ${response.failureCount}`);
+      this.logger.log(
+        `Sent notification to ${response.successCount} devices. Failed: ${response.failureCount}`,
+      );
     } catch (error) {
       this.logger.error('Error sending notification', error);
     }

@@ -1,0 +1,26 @@
+name: "Release: Staging"
+
+on:
+  push:
+    branches: [ "staging" ]
+  workflow_dispatch:
+
+jobs:
+  web:
+    uses: ./.github/workflows/call_deploy_web.yml
+    with:
+      environment: 'staging'
+    secrets: inherit
+
+  api:
+    uses: ./.github/workflows/call_deploy_api.yml
+    with:
+      environment: 'staging'
+    secrets: inherit
+
+  mobile:
+    uses: ./.github/workflows/call_deploy_mobile.yml
+    with:
+      flavor: 'stg'
+      track: 'beta'
+    secrets: inherit

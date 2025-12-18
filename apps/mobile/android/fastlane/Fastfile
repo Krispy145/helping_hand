@@ -1,0 +1,22 @@
+default_platform(:android)
+
+platform :android do
+  desc "Runs all the tests"
+  lane :test do
+    gradle(task: "test")
+  end
+
+  desc "Build and Deploy (Generic)"
+  lane :deploy do |options|
+    flavor = options[:flavor] || "dev"
+    track = options[:track] || "internal"
+
+    gradle(
+      task: "bundle",
+      build_type: "Release",
+      flavor: flavor
+    )
+    
+    # upload_to_play_store(track: track)
+  end
+end

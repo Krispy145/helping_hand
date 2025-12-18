@@ -40,22 +40,32 @@ model Session {
 }
 
 enum RequestStatus {
-  PENDING
+  PENDING_VETTING
   APPROVED
   REJECTED
-  FULFILLED
+  IN_PROGRESS
+  COMPLETED
   CANCELLED
 }
 
+enum RequestUrgency {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
 model Request {
-  id          String        @id @default(uuid())
+  id          String         @id @default(uuid())
   title       String
   description String
-  location    String
-  status      RequestStatus @default(PENDING)
-  authorId    String
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-
-  author User @relation(fields: [authorId], references: [id])
+  category    String?
+  status      RequestStatus  @default(PENDING_VETTING)
+  urgency     RequestUrgency @default(MEDIUM)
+  lat         Float?
+  lng         Float?
+  userId      String
+  user        User           @relation(fields: [userId], references: [id])
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 }

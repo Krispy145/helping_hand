@@ -9,7 +9,11 @@ export declare class AuthService {
     validateUser(email: string, pass: string): Promise<User | null>;
     login(user: User): Promise<{
         access_token: string;
-        user: User;
+        user: {
+            id: string;
+            email: string;
+            name: string | null | undefined;
+        };
     }>;
     register(dto: RegisterRequestDto): Promise<User>;
 }

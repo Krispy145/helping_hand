@@ -1,0 +1,88 @@
+name: "Call: Deploy Mobile"
+
+on:
+  workflow_call:
+    inputs:
+      flavor:
+        required: true
+        type: string
+        description: "Flavor to deploy (dev, stg, prod)"
+      track:
+        required: false
+        type: string
+        default: 'internal'
+        description: "Android Track (internal, alpha, beta, production)"
+
+jobs:
+  deploy-android:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./apps/mobile/android
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies
+        working-directory: ./apps/mobile
+        run: flutter pub get
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+          working-directory: ./apps/mobile/android
+
+      # - name: Setup Fastlane Secrets
+      #   run: echo "${{ secrets.GOOGLE_JSON_KEY }}" > fastlane/google-play-key.json
+
+      - name: Fastlane Android
+        uses: maierj/fastlane-action@v3.0.0
+        with:
+          lane: 'deploy' # We'll standardize on one lane name that accepts options, or distinct lanes
+          subdirectory: 'apps/mobile/android'
+          options: '{ "flavor": "${{ inputs.flavor }}", "track": "${{ inputs.track }}" }'
+
+  deploy-ios:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ./apps/mobile/ios
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies
+        working-directory: ./apps/mobile
+        run: flutter pub get
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+          working-directory: ./apps/mobile/ios
+
+      - name: Fastlane iOS
+        uses: maierj/fastlane-action@v3.0.0
+        with:
+          lane: 'deploy'
+          subdirectory: 'apps/mobile/ios'
+          options: '{ "flavor": "${{ inputs.flavor }}" }'

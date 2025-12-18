@@ -1,6 +1,6 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:utils/utils.dart';
 
 import 'app.dart';
 import 'flavors.dart';
@@ -9,10 +9,9 @@ import 'flavors.dart';
 const flavorName = String.fromEnvironment('FLAVOR', defaultValue: 'dev');
 
 void main() {
-  F.appFlavor = Flavor.values.firstWhere(
-    (element) => element.name == flavorName,
-    orElse: () => Flavor.dev,
-  );
+  F.appFlavor = Flavor.values.firstWhere((element) => element.name == flavorName, orElse: () => Flavor.dev);
+  AppLogger.initialize();
+  AppLogger.info('App initialized with flavor: ${F.name}');
 
   runApp(const ProviderScope(child: App()));
 }

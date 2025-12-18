@@ -1,0 +1,16 @@
+{
+  "name": "scripts",
+  "version": "1.0.0",
+  "description": "Helper scripts for Helping Hand",
+  "scripts": {
+    "update-api": "ts-node update_api_endpoints.ts"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  }
+}

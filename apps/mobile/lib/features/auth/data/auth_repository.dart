@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:models/models.dart';
+import 'package:utils/utils.dart';
+
 import '../../../../flavors.dart';
 
 class AuthRepository {
@@ -9,7 +11,7 @@ class AuthRepository {
 
   Future<AuthResponseDto> login(LoginRequestDto request) async {
     try {
-      final response = await _dio.post<Map<String, dynamic>>('/auth/login', data: request.toMap());
+      final response = await _dio.post<Map<String, dynamic>>(ApiEndpoints.authLogin, data: request.toMap());
       // Wait, dart_mappable generates Mapper classes, usually providing fromMap/fromJson.
       // But models.dart export might not expose the Mapper container directly unless I used it right.
       // Checking dart_mappable usage: usually it's ClassMapper.fromMap(map) or Class.fromMap(map) if hooks are set.
@@ -25,7 +27,7 @@ class AuthRepository {
 
   Future<AuthResponseDto> register(RegisterRequestDto request) async {
     try {
-      final response = await _dio.post<Map<String, dynamic>>('/auth/register', data: request.toMap());
+      final response = await _dio.post<Map<String, dynamic>>(ApiEndpoints.authRegister, data: request.toMap());
       return AuthResponseDtoMapper.fromMap(response.data!);
     } catch (e) {
       throw Exception('Registration failed: $e');

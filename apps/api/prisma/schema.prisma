@@ -25,18 +25,47 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  requests Request[]
-  sessions Session[]
+  requests      Request[]
+  helperSessions Session[] @relation("HelperSessions")
+  messages      Message[]
+}
+
+enum SessionStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
 }
 
 model Session {
   id        String   @id @default(uuid())
-  userId    String
-  token     String   @unique
-  expiresAt DateTime
+  
+  requestId String   @unique
+  request   Request  @relation(fields: [requestId], references: [id])
+  
+  helperId  String
+  helper    User     @relation("HelperSessions", fields: [helperId], references: [id])
+  
+  status    SessionStatus @default(ACTIVE)
+  
+  messages  Message[]
+  
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
 
-  user User @relation(fields: [userId], references: [id])
+model Message {
+  id        String   @id @default(uuid())
+  
+  sessionId String
+  session   Session  @relation(fields: [sessionId], references: [id])
+  
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id])
+  
+  content   String
+  read      Boolean  @default(false)
+  
+  createdAt DateTime @default(now())
 }
 
 enum RequestStatus {
@@ -68,4 +97,6 @@ model Request {
   user        User           @relation(fields: [userId], references: [id])
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
+
+  session     Session?
 }

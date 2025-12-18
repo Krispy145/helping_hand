@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../chat/data/chat_repository.dart';
 import '../../requests/providers/request_provider.dart';
 
 class FeedScreen extends ConsumerWidget {
@@ -9,9 +12,7 @@ class FeedScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Hardcoded location for MVP
     // In a real app we'd use Geolocator to get current position
-    final nearbyAsync = ref.watch(nearbyRequestsProvider(
-      (lat: 40.7128, lng: -74.0060, radius: 10.0),
-    ));
+    final nearbyAsync = ref.watch(nearbyRequestsProvider((lat: 40.7128, lng: -74.0060, radius: 10.0)));
 
     return nearbyAsync.when(
       data: (requests) {
@@ -31,15 +32,26 @@ class FeedScreen extends ConsumerWidget {
                   children: [
                     Text(req.description),
                     const SizedBox(height: 4),
-                    Text(
-                      '${req.urgency.name} • ${req.status.name}',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
+                    Text('${req.urgency.name} • ${req.status.name}', style: Theme.of(context).textTheme.bodySmall),
                   ],
                 ),
-                trailing: const Icon(Icons.arrow_forward_ios),
+                trailing: ElevatedButton(
+                  onPressed: () async {
+                    try {
+                      final session = await ref.read(chatRepositoryProvider).createSession(req.id);
+                      if (context.mounted) {
+                        await context.push('/session/${session.id}');
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to start session: $e')));
+                      }
+                    }
+                  },
+                  child: const Text('Assist'),
+                ),
                 onTap: () {
-                  // Navigate to details (later)
+                  // Navigate to details if needed
                 },
               ),
             );

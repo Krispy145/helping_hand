@@ -1,14 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:utils/utils.dart';
 
 import 'flavors.dart';
 import 'router.dart';
 
-class App extends ConsumerWidget {
+class App extends ConsumerStatefulWidget {
   const App({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<App> createState() => _AppState();
+}
+
+class _AppState extends ConsumerState<App> {
+  late final AppLifecycleObserver _lifecycleObserver;
+
+  @override
+  void initState() {
+    super.initState();
+    _lifecycleObserver = AppLifecycleObserver();
+    WidgetsBinding.instance.addObserver(_lifecycleObserver);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(_lifecycleObserver);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final router = ref.watch(AppRouter.instance.routerProvider);
 
     return MaterialApp.router(

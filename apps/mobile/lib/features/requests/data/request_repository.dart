@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:models/models.dart';
+import 'package:utils/utils.dart';
+
 import '../../../core/network/dio_provider.dart';
 
 final requestRepositoryProvider = Provider<RequestRepository>((ref) {
@@ -15,7 +17,7 @@ class RequestRepository {
   Future<RequestDto> createRequest(CreateRequestDto dto) async {
     try {
       final response = await _dio.post<Map<String, dynamic>>(
-        '/requests',
+        ApiEndpoints.requests,
         data: dto.toJson(), // dart_mappable extension
       );
       // Ensure the response data is parsed correctly using MapperContainer if explicit decoding needed,
@@ -30,7 +32,7 @@ class RequestRepository {
 
   Future<List<RequestDto>> getNearbyRequests({double lat = 40.7128, double lng = -74.0060, double radius = 10}) async {
     try {
-      final response = await _dio.get<List<Map<String, dynamic>>>('/requests/nearby', queryParameters: {'lat': lat, 'lng': lng, 'radius': radius});
+      final response = await _dio.get<List<Map<String, dynamic>>>(ApiEndpoints.requestsNearby, queryParameters: {'lat': lat, 'lng': lng, 'radius': radius});
       // Depending on API, response.data could be List<dynamic>
       final list = response.data!;
       return list.map(RequestDtoMapper.fromMap).toList();

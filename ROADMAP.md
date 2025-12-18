@@ -45,9 +45,9 @@ This document tracks the high-level progress of the Helping Hand project.
 ## 🔮 Future Phases
 
 ### **Phase 4: Real-time Connection (v0.4.0)**
-- [ ] WebSocket Gateway (NestJS).
-- [ ] Real-time Chat (Flutter).
-- [ ] Session Management (Accept/Decline flow).
+- [x] WebSocket Gateway (NestJS).
+- [x] Real-time Chat (Flutter).
+- [x] Session Management (Accept/Decline flow).
 
 ### **Phase 5: Safety & Reporting (v0.5.0)**
 - [ ] "Emergency" & "Report" buttons.

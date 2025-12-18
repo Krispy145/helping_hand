@@ -1,0 +1,18 @@
+name: utils
+description: Shared utilities for Helping Hand.
+version: 1.0.0
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  logger: ^2.0.0
+  intl: ^0.20.0
+  meta: ^1.11.0
+  dio: ^5.9.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  lints: ^5.0.0

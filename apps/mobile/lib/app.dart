@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ui/ui.dart';
 import 'package:utils/utils.dart';
 
 import 'flavors.dart';
@@ -34,7 +35,7 @@ class _AppState extends ConsumerState<App> {
 
     return MaterialApp.router(
       title: F.title,
-      theme: ThemeData(primarySwatch: Colors.blue),
+      theme: AppTheme.lightTheme,
       routerConfig: router,
       builder: (context, child) => _flavorBanner(child: child ?? const SizedBox.shrink()),
     );

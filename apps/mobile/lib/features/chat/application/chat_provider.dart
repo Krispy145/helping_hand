@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:mobile/flavors.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
@@ -73,7 +75,7 @@ class Chat extends _$Chat {
           state = AsyncValue.data(state.value!.copyWith(messages: [...currentList, msg]));
         }
       } catch (e) {
-        print('Error parsing message: $e');
+        log('Error parsing message: $e');
       }
     });
 

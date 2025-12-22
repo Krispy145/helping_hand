@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:utils/utils.dart';
 
 import 'app.dart';
+import 'core/app_observer.dart';
 import 'flavors.dart';
 
 // Use --dart-define=FLAVOR=dev
@@ -13,5 +14,5 @@ void main() {
   AppLogger.initialize();
   AppLogger.info('App initialized with flavor: ${F.name}');
 
-  runApp(const ProviderScope(child: App()));
+  runApp(ProviderScope(observers: [AppObserver()], child: const App()));
 }

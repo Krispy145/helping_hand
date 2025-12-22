@@ -60,5 +60,9 @@
 		<true/>
 		<key>UIStatusBarHidden</key>
 		<false/>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Helping Hand needs your location to find requests nearby.</string>
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>Helping Hand needs your location to find requests nearby.</string>
 	</dict>
 </plist>

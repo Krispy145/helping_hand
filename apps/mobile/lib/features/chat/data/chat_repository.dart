@@ -11,13 +11,13 @@ class ChatRepository {
   ChatRepository(this._dio);
 
   Future<ChatSession> createSession(String requestId) async {
-    final response = await _dio.post(ApiEndpoints.sessions, data: {'requestId': requestId});
-    return ChatSessionMapper.fromMap(response.data as Map<String, dynamic>);
+    final response = await _dio.post<Map<String, dynamic>>(ApiEndpoints.sessions, data: {'requestId': requestId});
+    return ChatSessionMapper.fromMap(response.data!);
   }
 
   Future<List<ChatMessage>> getMessages(String sessionId) async {
-    final response = await _dio.get(ApiEndpoints.sessionsMessages(sessionId));
-    return (response.data as List).map((e) => ChatMessageMapper.fromMap(e as Map<String, dynamic>)).toList();
+    final response = await _dio.get<List<dynamic>>(ApiEndpoints.sessionsMessages(sessionId));
+    return response.data!.map((e) => ChatMessageMapper.fromMap(e as Map<String, dynamic>)).toList();
   }
 }
 

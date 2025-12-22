@@ -1,70 +1,28 @@
 import 'package:flutter/material.dart';
 
-@immutable
-class AppColors extends ThemeExtension<AppColors> {
-  final Color primary;
-  final Color secondary;
-  final Color background;
-  final Color surface;
-  final Color error;
-  final Color textPrimary;
-  final Color textSecondary;
+abstract class AppColors {
+  // Primary Palette (Deep Soft Purple)
+  static const Color primary = Color(0xFF6B4E71);
+  static const Color primaryLight = Color(0xFF917296);
+  static const Color primaryDark = Color(0xFF4A3450);
 
-  const AppColors({
-    required this.primary,
-    required this.secondary,
-    required this.background,
-    required this.surface,
-    required this.error,
-    required this.textPrimary,
-    required this.textSecondary,
-  });
+  // Secondary Palette (Sage Green)
+  static const Color secondary = Color(0xFF8FB9A8);
+  static const Color secondaryLight = Color(0xFFBFE0D4);
+  static const Color secondaryDark = Color(0xFF618A7A);
 
-  @override
-  AppColors copyWith({
-    Color? primary,
-    Color? secondary,
-    Color? background,
-    Color? surface,
-    Color? error,
-    Color? textPrimary,
-    Color? textSecondary,
-  }) {
-    return AppColors(
-      primary: primary ?? this.primary,
-      secondary: secondary ?? this.secondary,
-      background: background ?? this.background,
-      surface: surface ?? this.surface,
-      error: error ?? this.error,
-      textPrimary: textPrimary ?? this.textPrimary,
-      textSecondary: textSecondary ?? this.textSecondary,
-    );
-  }
+  // Backgrounds (Warm Off-White)
+  static const Color background = Color(0xFFFDFBF7);
+  static const Color surface = Color(0xFFFFFFFF);
+  static const Color surfaceVariant = Color(0xFFF2F2F2);
 
-  @override
-  AppColors lerp(ThemeExtension<AppColors>? other, double t) {
-    if (other is! AppColors) {
-      return this;
-    }
-    return AppColors(
-      primary: Color.lerp(primary, other.primary, t)!,
-      secondary: Color.lerp(secondary, other.secondary, t)!,
-      background: Color.lerp(background, other.background, t)!,
-      surface: Color.lerp(surface, other.surface, t)!,
-      error: Color.lerp(error, other.error, t)!,
-      textPrimary: Color.lerp(textPrimary, other.textPrimary, t)!,
-      textSecondary: Color.lerp(textSecondary, other.textSecondary, t)!,
-    );
-  }
+  // Text & Icons
+  static const Color textPrimary = Color(0xFF2D2D2D);
+  static const Color textSecondary = Color(0xFF5A5A5A);
+  static const Color textDisabled = Color(0xFFB0B0B0);
 
-  // Factory for default light theme
-  factory AppColors.light() => const AppColors(
-        primary: Color(0xFF6200EE),
-        secondary: Color(0xFF03DAC6),
-        background: Color(0xFFF6F6F6),
-        surface: Colors.white,
-        error: Color(0xFFB00020),
-        textPrimary: Colors.black,
-        textSecondary: Colors.grey,
-      );
+  // Status
+  static const Color error = Color(0xFFD36135); // Muted red
+  static const Color success = Color(0xFF7FA87F); // Muted green
+  static const Color warning = Color(0xFFE0A458); // Muted orange
 }

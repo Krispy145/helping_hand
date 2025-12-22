@@ -4,6 +4,7 @@ import 'package:utils/utils.dart';
 
 import 'features/auth/presentation/login_screen.dart';
 import 'features/auth/presentation/register_screen.dart';
+import 'features/auth/providers/auth_provider.dart';
 import 'features/chat/presentation/chat_screen.dart';
 import 'features/home/presentation/home_screen.dart';
 import 'features/requests/presentation/create_request_screen.dart';
@@ -22,6 +23,17 @@ class AppRouter {
     return GoRouter(
       initialLocation: loginRoute,
       observers: [LoggingNavigatorObserver()],
+      refreshListenable: ref.read(authProvider.notifier),
+      redirect: (context, state) {
+        final authState = ref.read(authProvider);
+        final isLoggedIn = authState.asData?.value != null;
+        final isLoggingIn = state.uri.toString() == loginRoute || state.uri.toString() == registerRoute;
+
+        if (!isLoggedIn && !isLoggingIn) return loginRoute;
+        if (isLoggedIn && isLoggingIn) return homeRoute;
+
+        return null;
+      },
       routes: [
         GoRoute(path: homeRoute, builder: (context, state) => const HomeScreen()),
         GoRoute(path: loginRoute, builder: (context, state) => const LoginScreen()),

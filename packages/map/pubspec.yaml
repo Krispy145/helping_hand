@@ -1,0 +1,27 @@
+name: map
+description: A clean architecture map package using flutter_map.
+version: 0.0.1
+publish_to: 'none'
+
+environment:
+  sdk: ^3.9.2
+  flutter: ">=3.16.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+  flutter_riverpod: ^3.0.3
+  geolocator: ^13.0.2
+  utils:
+    path: ../utils
+  ui:
+    path: ../ui
+  models:
+    path: ../models
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0

@@ -34,6 +34,8 @@ export class AuthService {
         email: user.email,
         name: user.name,
         role: user.role,
+        created_at: user.createdAt,
+        updated_at: user.updatedAt,
       },
     };
   }
@@ -69,7 +71,18 @@ export class AuthService {
           email: user.email,
           name: user.name,
           role: user.role,
+          created_at: user.createdAt,
+          updated_at: user.updatedAt,
       }
     } as any; // Type casting for now since return type of method says Promise<User> but controller expects AuthResponseDto wrapper.
+  }
+  async getUserById(id: string): Promise<User | null> {
+    const user = await this.userRepository.findById(id);
+    if (user) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { password, ...result } = user;
+        return result as User;
+    }
+    return null;
   }
 }

@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:models/models.dart';
+
+import '../../../core/listenable_notifier.dart';
 import '../data/auth_repository.dart';
 
 // Dependency Providers
@@ -17,7 +19,7 @@ final authProvider = AsyncNotifierProvider<AuthNotifier, UserDto?>(() {
   return AuthNotifier();
 });
 
-class AuthNotifier extends AsyncNotifier<UserDto?> {
+class AuthNotifier extends AsyncNotifier<UserDto?> with ListenableNotifier {
   late final AuthRepository _repository;
   late final FlutterSecureStorage _storage;
   static const _tokenKey = 'auth_token';
@@ -32,14 +34,14 @@ class AuthNotifier extends AsyncNotifier<UserDto?> {
   Future<UserDto?> _checkAuth() async {
     final token = await _storage.read(key: _tokenKey);
     if (token != null) {
-      // TODO: Validate token or fetch user profile from API.
-      // For now, we assume if token exists we are logged in, but we don't have user data.
-      // This is a gap. We need /me endpoint.
-      // Returning null for user but maybe we need a separate "isLoading" or "isAuthenticated" state.
-      // For MVP, if we don't have user data, we are not fully logged in for the UI state.
-      // I'll leave as null (logged out) until we implement persistence of user or /me endpoint.
-      // OR, I can force logout if no user data.
-      return null; 
+      try {
+        final user = await _repository.getProfile();
+        return user;
+      } catch (e) {
+        // Token invalid or expired
+        await logout();
+        return null;
+      }
     }
     return null;
   }

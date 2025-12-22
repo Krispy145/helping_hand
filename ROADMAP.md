@@ -14,46 +14,56 @@ This document tracks the high-level progress of the Helping Hand project.
 
 ### **Phase 2: Authentication (v0.2.0)**
 - [x] **Backend Auth:** JWT Strategy, Passport, Bcrypt.
-- [x] **Mobile Auth:** Secure Storage, Riverpod State, Login/Register UI.
+- [x] **Mobile Auth:** Secure Storage, Riverpod, Login/Register UI.
+- [x] **Persistence:** Token Storage, Auto-Restore Session, `/auth/me` Endpoint.
 - [x] **API Docs:** Swagger UI (`/api`).
 
 ---
 
-## 🚧 Current Phase: Request & Safety Core (v0.3.0)
+## 🚧 Current Phase: UI/UX & Web Dashboard (v0.3.0)
 
-### **Next Steps**
-1.  **Request Feature (Mobile & API)**
-    - [x] User can create a Help Request (Title, Type, Location, Urgency).
-    - [x] Database Schema update (`Request` model).
-2.  **Automated Vetting (Backend)**
-    - [x] Integration of "Vetting Guard" to filter unsafe content.
-    - [x] Status transitions (`pending_vetting` -> `approved` / `rejected`).
-3.  **Discovery (Mobile)**
-    - [x] "Helpers Nearby" feed (Geo-queries).
+### **1. UI/UX Refinement (Mobile)**
+*Goal: Align with "Calm, Dignified, Human" design principles.*
+- [ ] **Theme Update:** Soft color palette, premium typography (Google Fonts).
+- [ ] **Interaction Design:** Smooth transitions, "deep breath" pacing.
+- [ ] **Component Polish:** "Dignified" cards for Requests, minimalist inputs.
 
-## Phase 2: Refinement & Testing (v0.x.x)
-- [ ] **Code Quality**:
-    - [ ] Resolved all Lint Warnings (BE/FE).
-    - [ ] `flutter analyze` passing.
-- [ ] **Testing Strategy**:
-    - [ ] Unit Tests for Auto-Vetting (Done).
-    - [ ] Integration Tests for Auth & Requests.
-    - [ ] Widget Tests for Core Screens.
+### **2. Web Pulse Dashboard (MVP)**
+*Goal: A calm monitoring interface for admins.*
+- [ ] **Setup:** Web-optimized Navigation & Layout.
+- [ ] **Auth:** Web Persistence & Login Screen.
+- [ ] **Vetting Queue:** Interface to approve/reject requests.
+
+### **3. Map Feature (Home View) 🗺️**
+*Goal: Visual discovery of helpers using OpenStreetMap.*
+- [ ] **Map Package:** Create `packages/map` with Riverpod Clean Arch.
+- [ ] **Integration:** Replace Home Screen list with Map View.
+
+### **4. Auth & Onboarding 👤**
+*Goal: Smooth, private, and helpful entry.*
+- [ ] **Auth Polish:** Device email autofill, "Calm" UI.
+- [ ] **Profile:** Optional local avatar, privacy-focused.
+- [ ] **Onboarding:** "First Launch" experience & Permissions flow.
+- [ ] **Settings:** Profile & Permission management.
+
+### **5. Polishing the Core ✨**
+- [ ] **Chat UI:** Apply "Calm Joy" theme to chat.
+- [ ] **Quality:** Resolve all lints, optimize AppLifecycle.
+
+## Phase 4: Refinement & Testing (v0.4.0)
+- [ ] **Code Quality**: Resolve Lint Warnings.
+- [ ] **Testing**: Integration Tests for Auth & Requests.
 
 ---
 
 ## 🔮 Future Phases
 
-### **Phase 4: Real-time Connection (v0.4.0)**
-- [x] WebSocket Gateway (NestJS).
-- [x] Real-time Chat (Flutter).
-- [x] Session Management (Accept/Decline flow).
-
-### **Phase 5: Safety & Reporting (v0.5.0)**
-- [ ] "Emergency" & "Report" buttons.
-- [ ] Privacy Controls (Location masking).
+### **Phase 5: Real-time Connection**
+- [x] WebSocket Gateway.
+- [ ] Real-time Chat UI Polish.
+- [ ] Session Management Polish.
 
 ### **Phase 6: Polish & Beta (v1.0.0)**
-- [ ] Push Notifications (FCM).
-- [ ] Shorebird OTA Setup.
-- [ ] App Store / Play Store Prep.
+- [ ] Push Notifications.
+- [ ] Shorebird OTA.
+

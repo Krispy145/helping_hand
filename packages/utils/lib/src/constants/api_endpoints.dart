@@ -2,6 +2,7 @@ class ApiEndpoints {
   static const String root = '/';
   static const String authLogin = '/auth/login';
   static const String authRegister = '/auth/register';
+  static const String authMe = '/auth/me';
   static const String requests = '/requests';
   static const String requestsNearby = '/requests/nearby';
   static const String sessions = '/sessions';

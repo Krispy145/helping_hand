@@ -71,11 +71,14 @@ let AuthService = class AuthService {
     async login(user) {
         const payload = { email: user.email, sub: user.id, role: user.role };
         return {
-            accessToken: await this.jwtService.signAsync(payload),
+            access_token: await this.jwtService.signAsync(payload),
             user: {
                 id: user.id,
                 email: user.email,
                 name: user.name,
+                role: user.role,
+                created_at: user.createdAt,
+                updated_at: user.updatedAt,
             },
         };
     }
@@ -96,13 +99,24 @@ let AuthService = class AuthService {
         const user = new user_entity_1.User(result);
         const payload = { email: user.email, sub: user.id, role: user.role };
         return {
-            accessToken: await this.jwtService.signAsync(payload),
+            access_token: await this.jwtService.signAsync(payload),
             user: {
                 id: user.id,
                 email: user.email,
                 name: user.name,
+                role: user.role,
+                created_at: user.createdAt,
+                updated_at: user.updatedAt,
             }
         };
+    }
+    async getUserById(id) {
+        const user = await this.userRepository.findById(id);
+        if (user) {
+            const { password, ...result } = user;
+            return result;
+        }
+        return null;
     }
 };
 exports.AuthService = AuthService;

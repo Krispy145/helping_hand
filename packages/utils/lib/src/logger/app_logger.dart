@@ -44,6 +44,7 @@ class AppLoggerInjector {
 
     // Initialize Logger instance
     _logger = Logger(
+      level: Level.all, // Ensure all logs are shown
       printer: PrettyPrinter(
         methodCount: 0, // Don't show method count
       ),

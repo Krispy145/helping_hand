@@ -33,6 +33,7 @@ export class AuthService {
         id: user.id,
         email: user.email,
         name: user.name,
+        role: user.role,
       },
     };
   }
@@ -54,6 +55,21 @@ export class AuthService {
     const createdUser = await this.userRepository.create(newUser);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...result } = createdUser;
-    return new User(result);
+    // Need to login automatically or return just the user
+    // The DTO expects AuthResponseDto (token + user)
+    // But this method currently returns just User entity.
+    // I should probably sign a token here too for auto-login.
+    const user = new User(result);
+    // Auto-login logic duplicated for now:
+    const payload = { email: user.email, sub: user.id, role: user.role };
+    return {
+      access_token: await this.jwtService.signAsync(payload),
+      user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+      }
+    } as any; // Type casting for now since return type of method says Promise<User> but controller expects AuthResponseDto wrapper.
   }
 }

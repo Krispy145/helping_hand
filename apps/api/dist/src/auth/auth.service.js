@@ -71,7 +71,7 @@ let AuthService = class AuthService {
     async login(user) {
         const payload = { email: user.email, sub: user.id, role: user.role };
         return {
-            access_token: await this.jwtService.signAsync(payload),
+            accessToken: await this.jwtService.signAsync(payload),
             user: {
                 id: user.id,
                 email: user.email,
@@ -93,7 +93,16 @@ let AuthService = class AuthService {
         });
         const createdUser = await this.userRepository.create(newUser);
         const { password, ...result } = createdUser;
-        return new user_entity_1.User(result);
+        const user = new user_entity_1.User(result);
+        const payload = { email: user.email, sub: user.id, role: user.role };
+        return {
+            accessToken: await this.jwtService.signAsync(payload),
+            user: {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+            }
+        };
     }
 };
 exports.AuthService = AuthService;

@@ -1,9 +1,13 @@
+import 'package:dart_mappable/dart_mappable.dart';
 import 'package:dio/dio.dart';
 
 class ExceptionMapper {
   static String map(Object? error) {
     if (error is DioException) {
       return _mapDioException(error);
+    }
+    if (error is MapperException) {
+      return 'Data error: ${error.message}';
     }
     // Add other custom exceptions here (e.g., AuthException)
 

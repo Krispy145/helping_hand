@@ -88,11 +88,13 @@ class UserDtoMapper extends ClassMapperBase<UserDto> {
   static const Field<UserDto, DateTime> _f$createdAt = Field(
     'createdAt',
     _$createdAt,
+    key: r'created_at',
   );
   static DateTime _$updatedAt(UserDto v) => v.updatedAt;
   static const Field<UserDto, DateTime> _f$updatedAt = Field(
     'updatedAt',
     _$updatedAt,
+    key: r'updated_at',
   );
 
   @override

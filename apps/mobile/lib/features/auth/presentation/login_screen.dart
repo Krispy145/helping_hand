@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:utils/utils.dart';
 
 import '../providers/auth_provider.dart';
 
@@ -41,8 +42,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     // Show error if any
     ref.listen(authProvider, (previous, next) {
-      if (next.hasError) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: ${next.error}')));
+      if (next.hasError && (!previous!.hasError || previous.error != next.error)) {
+        context.showErrorSnackBar(next.error);
       }
     });
 

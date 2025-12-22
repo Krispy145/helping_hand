@@ -181,11 +181,13 @@ class RequestDtoMapper extends ClassMapperBase<RequestDto> {
   static const Field<RequestDto, DateTime> _f$createdAt = Field(
     'createdAt',
     _$createdAt,
+    key: r'created_at',
   );
   static DateTime _$updatedAt(RequestDto v) => v.updatedAt;
   static const Field<RequestDto, DateTime> _f$updatedAt = Field(
     'updatedAt',
     _$updatedAt,
+    key: r'updated_at',
   );
   static UserDto? _$user(RequestDto v) => v.user;
   static const Field<RequestDto, UserDto> _f$user = Field(

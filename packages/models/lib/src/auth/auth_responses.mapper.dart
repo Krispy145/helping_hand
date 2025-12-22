@@ -26,6 +26,7 @@ class AuthResponseDtoMapper extends ClassMapperBase<AuthResponseDto> {
   static const Field<AuthResponseDto, String> _f$accessToken = Field(
     'accessToken',
     _$accessToken,
+    key: r'access_token',
   );
   static UserDto _$user(AuthResponseDto v) => v.user;
   static const Field<AuthResponseDto, UserDto> _f$user = Field('user', _$user);

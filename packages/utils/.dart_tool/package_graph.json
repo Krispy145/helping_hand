@@ -7,6 +7,7 @@
       "name": "utils",
       "version": "1.0.0",
       "dependencies": [
+        "dart_mappable",
         "dio",
         "flutter",
         "intl",
@@ -39,6 +40,15 @@
         "stream_channel",
         "test_api",
         "vector_math"
+      ]
+    },
+    {
+      "name": "dart_mappable",
+      "version": "4.6.1",
+      "dependencies": [
+        "collection",
+        "meta",
+        "type_plus"
       ]
     },
     {
@@ -165,6 +175,11 @@
         "string_scanner",
         "term_glyph"
       ]
+    },
+    {
+      "name": "type_plus",
+      "version": "2.1.1",
+      "dependencies": []
     },
     {
       "name": "dio_web_adapter",

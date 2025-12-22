@@ -1,0 +1,8 @@
+targets:
+  $default:
+    builders:
+      dart_mappable_builder:
+        options:
+          caseStyle: snakeCase
+          codeStyle:
+            explicitToJson: true

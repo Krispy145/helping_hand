@@ -8,7 +8,7 @@ export declare class AuthService {
     constructor(userRepository: IUserRepository, jwtService: JwtService);
     validateUser(email: string, pass: string): Promise<User | null>;
     login(user: User): Promise<{
-        access_token: string;
+        accessToken: string;
         user: {
             id: string;
             email: string;

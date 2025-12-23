@@ -31,10 +31,11 @@ class MapController extends _$MapController {
   Future<void> searchArea(LatLng center, double radius) async {
     state = state.copyWith(isSearching: true, center: center);
     try {
-      // Simulate network delay or use the provider logic
-      // Actually we should probably just refresh the nearbyRequestsProvider
-      // But since we want to manage state here:
-      final requests = await ref.read(nearbyRequestsProvider((lat: center.latitude, lng: center.longitude, radius: radius)).future);
+      // Simulate "Searching" delay for UI effect (Radar Pulse)
+      await Future<void>.delayed(const Duration(seconds: 2));
+
+      // Force refresh the provider to get new data
+      final requests = await ref.refresh(nearbyRequestsProvider((lat: center.latitude, lng: center.longitude, radius: radius)).future);
       state = state.copyWith(isSearching: false, requests: requests);
     } catch (e) {
       state = state.copyWith(isSearching: false, error: e);

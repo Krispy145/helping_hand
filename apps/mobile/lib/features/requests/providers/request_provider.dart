@@ -1,14 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:models/models.dart';
+
 import '../data/request_repository.dart';
 
 // Provider for fetching nearby requests
 final nearbyRequestsProvider = FutureProvider.autoDispose.family<List<RequestDto>, ({double lat, double lng, double radius})>((ref, params) async {
-  return ref.watch(requestRepositoryProvider).getNearbyRequests(
-    lat: params.lat,
-    lng: params.lng,
-    radius: params.radius,
-  );
+  // Simulate network latency for "Loading State UI" visibility
+  await Future<void>.delayed(const Duration(seconds: 1));
+
+  return ref.watch(requestRepositoryProvider).getNearbyRequests(lat: params.lat, lng: params.lng, radius: params.radius);
 });
 
 final requestProvider = AsyncNotifierProvider<RequestNotifier, void>(() {

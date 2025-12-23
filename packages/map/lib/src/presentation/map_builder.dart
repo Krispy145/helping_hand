@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
-class HelpingHandMap extends StatelessWidget {
+class MapBuilder extends StatelessWidget {
   final LatLng? initialCenter;
   final List<Marker> markers;
   final MapController? mapController;
 
-  const HelpingHandMap({super.key, this.initialCenter, this.markers = const [], this.mapController});
+  const MapBuilder({super.key, this.initialCenter, this.markers = const [], this.mapController});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +26,9 @@ class HelpingHandMap extends StatelessWidget {
         ),
         MarkerLayer(markers: markers),
         // Copyright/Attribution for OSM
-        RichAttributionWidget(attributions: [TextSourceAttribution('OpenStreetMap contributors', onTap: () {})]),
+        SafeArea(
+          child: RichAttributionWidget(attributions: [TextSourceAttribution('OpenStreetMap contributors', onTap: () {})]),
+        ),
       ],
     );
   }

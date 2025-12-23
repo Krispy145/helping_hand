@@ -18,7 +18,7 @@ class HomeScreen extends ConsumerWidget {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         forceMaterialTransparency: true,
-        backgroundColor: Colors.transparent, // Floating effect
+        backgroundColor: Colors.transparent,
         elevation: 0,
         title: SegmentedButton<int>(
           segments: const [
@@ -48,7 +48,7 @@ class HomeScreen extends ConsumerWidget {
         centerTitle: true,
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 8),
+            padding: const EdgeInsets.only(right: 16),
             child: CircleAvatar(
               backgroundColor: context.surface,
               child: IconButton(

@@ -82,7 +82,7 @@ class _MapScreenState extends ConsumerState<MapScreen> with TickerProviderStateM
                 );
               }
 
-              return HelpingHandMap(mapController: _mapController, initialCenter: center, markers: markers);
+              return MapBuilder(mapController: _mapController, initialCenter: center, markers: markers);
             },
             loading: () => const Center(child: BreathingLoader()),
             error: (e, s) => Center(child: Text('Error: $e')),
@@ -94,7 +94,7 @@ class _MapScreenState extends ConsumerState<MapScreen> with TickerProviderStateM
           // Controls
           Positioned(
             right: 16,
-            bottom: 32, // Adjust for bottom nav if needed
+            top: MediaQuery.of(context).viewInsets.top + 164,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [

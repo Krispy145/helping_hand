@@ -7,6 +7,7 @@ import 'package:utils/utils.dart';
 import 'app.dart';
 import 'core/app_observer.dart';
 import 'core/shared_preferences_provider.dart';
+import 'core/storage/logging_shared_preferences.dart';
 import 'flavors.dart';
 import 'router.dart';
 
@@ -26,7 +27,10 @@ void main() async {
     TranslationProvider(
       child: ProviderScope(
         observers: [AppObserver()],
-        overrides: [AppRouter.instance.initialLocationProvider.overrideWithValue(hasSeenOnboarding ? '/login' : '/onboarding'), sharedPreferencesProvider.overrideWithValue(prefs)],
+        overrides: [
+          AppRouter.instance.initialLocationProvider.overrideWithValue(hasSeenOnboarding ? AppRoutes.login : AppRoutes.onboarding),
+          sharedPreferencesProvider.overrideWithValue(LoggingSharedPreferences(prefs)),
+        ],
         child: const App(),
       ),
     ),

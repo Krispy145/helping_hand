@@ -36,7 +36,7 @@ class SettingsController extends _$SettingsController {
 
   Future<void> handlePermission(Permission permission) async {
     final status = await permission.status;
-    if (status.isPermanentlyDenied) {
+    if (status.isGranted || status.isPermanentlyDenied) {
       await openAppSettings();
     } else {
       await permission.request();

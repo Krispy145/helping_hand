@@ -9,19 +9,36 @@ final onboardingCompletedProvider = AsyncNotifierProvider<OnboardingCompletedNot
 });
 
 class OnboardingCompletedNotifier extends AsyncNotifier<bool> with ListenableNotifier<bool> {
-  static const _key = 'onboarding_seen';
+  static const _keyCompleted = 'onboarding_seen';
+  static const _keySteps = 'onboarding_seen_steps';
 
   @override
   Future<bool> build() async {
-    // We use ref.watch to rebuild if prefs change? Likely not needed for prefs, read is enough.
-    // But keeping watch is fine.
     final prefs = ref.watch(sharedPreferencesProvider);
-    return prefs.getBool(_key) ?? false;
+    return prefs.getBool(_keyCompleted) ?? false;
   }
 
   Future<void> completeOnboarding() async {
     final prefs = ref.read(sharedPreferencesProvider);
-    await prefs.setBool(_key, true);
+    await prefs.setBool(_keyCompleted, true);
     state = const AsyncValue.data(true);
+  }
+
+  /// Skips onboarding for this session only. Does NOT persist completion.
+  Future<void> skipSession() async {
+    state = const AsyncValue.data(true);
+  }
+
+  Future<void> markStepSeen(String stepName) async {
+    final prefs = ref.read(sharedPreferencesProvider);
+    final seen = prefs.getStringList(_keySteps) ?? [];
+    if (!seen.contains(stepName)) {
+      await prefs.setStringList(_keySteps, [...seen, stepName]);
+    }
+  }
+
+  List<String> getSeenSteps() {
+    final prefs = ref.read(sharedPreferencesProvider);
+    return prefs.getStringList(_keySteps) ?? [];
   }
 }

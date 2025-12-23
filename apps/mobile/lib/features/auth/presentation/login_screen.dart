@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:ui/ui.dart';
 import 'package:utils/utils.dart';
 
+import '../../../router.dart';
 import '../providers/auth_provider.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -92,7 +93,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           child: ElevatedButton(onPressed: _submit, child: const Text('Login')),
                         ),
                       const SizedBox(height: 16),
-                      TextButton(onPressed: () => context.push('/register'), child: const Text('Create Account')),
+                      TextButton(onPressed: () => context.push(AppRoutes.register), child: const Text('Create Account')),
                     ],
                   ),
                 ),

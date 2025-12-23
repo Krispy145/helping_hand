@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:ui/ui.dart';
 
+import '../../../router.dart';
 import '../../auth/presentation/widgets/profile_avatar.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../application/theme_controller.dart';
@@ -94,7 +95,7 @@ class SettingsScreen extends ConsumerWidget {
               child: OutlinedButton(
                 onPressed: () {
                   ref.read(authProvider.notifier).logout();
-                  context.go('/login');
+                  context.go(AppRoutes.login);
                 },
                 child: Text(t.strings.settings.logout),
               ),

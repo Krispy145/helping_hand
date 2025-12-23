@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ui/ui.dart';
 
+import '../../../router.dart';
 import '../../map/presentation/map_controller.dart' as map_logic; // Alias to avoid conflict
 import '../../map/presentation/map_screen.dart';
 import '../../requests/providers/request_provider.dart';
@@ -55,7 +56,7 @@ class HomeScreen extends ConsumerWidget {
               backgroundColor: context.surface,
               child: IconButton(
                 icon: Icon(Icons.settings, color: context.textPrimary),
-                onPressed: () => context.push('/settings'),
+                onPressed: () => context.push(AppRoutes.settings),
               ),
             ),
           ),
@@ -91,7 +92,7 @@ class HomeScreen extends ConsumerWidget {
             child: const Icon(Icons.refresh),
           ),
           const SizedBox(height: 16),
-          FloatingActionButton(heroTag: 'add_request', onPressed: () => context.push('/create-request'), child: const Icon(Icons.add)),
+          FloatingActionButton(heroTag: 'add_request', onPressed: () => context.push(AppRoutes.createRequest), child: const Icon(Icons.add)),
         ],
       ),
     );

@@ -4,6 +4,7 @@ import 'package:models/models.dart';
 
 import '../../../core/api_client_provider.dart';
 import '../../../core/listenable_notifier.dart';
+import '../../../core/storage/logging_secure_storage.dart';
 import '../data/auth_repository.dart';
 
 // Dependency Providers
@@ -13,7 +14,7 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
 });
 
 final secureStorageProvider = Provider<FlutterSecureStorage>((ref) {
-  return const FlutterSecureStorage();
+  return const LoggingSecureStorage();
 });
 
 // State

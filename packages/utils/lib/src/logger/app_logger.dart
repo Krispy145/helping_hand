@@ -4,8 +4,24 @@ import 'package:logger/logger.dart';
 /// Log level enum for categorizing log messages
 enum LogLevel { debug, info, warning, error, fatal }
 
+/// Feature enum for categorizing logs by functional area
+enum LogFeature {
+  auth('🔐'),
+  storage('💾'),
+  map('🗺️'),
+  network('🌐'),
+  ui('🖼️'),
+  core('⚡'),
+  onboarding('🚀'),
+  settings('⚙️'),
+  notification('🔔');
+
+  final String emoji;
+  const LogFeature(this.emoji);
+}
+
 /// Callback type for custom log handlers
-typedef LogHandler = void Function(LogLevel level, String message, {Object? error, StackTrace? stackTrace, Map<String, dynamic>? extras});
+typedef LogHandler = void Function(LogLevel level, String message, {Object? error, StackTrace? stackTrace, Map<String, dynamic>? extras, LogFeature? feature});
 
 /// Setup class for configuring AppLoggerInjector
 class LoggerSetup {
@@ -64,9 +80,19 @@ class AppLoggerInjector {
   }
 
   /// Debug handler for local development
-  void _debugHandler(LogLevel level, String message, {Object? error, StackTrace? stackTrace, Map<String, dynamic>? extras}) {
-    // Build the log message with extras if present
-    final logMessage = extras != null && extras.isNotEmpty ? '$message\nExtras: $extras' : message;
+  void _debugHandler(LogLevel level, String message, {Object? error, StackTrace? stackTrace, Map<String, dynamic>? extras, LogFeature? feature}) {
+    // Build the log message with feature and extras
+    final buffer = StringBuffer();
+    if (feature != null) {
+      buffer.write('[${feature.emoji} ${feature.name}] ');
+    }
+    buffer.write(message);
+
+    if (extras != null && extras.isNotEmpty) {
+      buffer.write('\nExtras: $extras');
+    }
+
+    final logMessage = buffer.toString();
 
     // Use Logger's appropriate method based on level
     switch (level) {
@@ -89,31 +115,31 @@ class AppLoggerInjector {
   }
 
   /// Log a debug message
-  void debug(String message, {Map<String, dynamic>? extras}) {
-    _log(LogLevel.debug, message, extras: extras);
+  void debug(String message, {Map<String, dynamic>? extras, LogFeature? feature}) {
+    _log(LogLevel.debug, message, extras: extras, feature: feature);
   }
 
   /// Log an info message
-  void info(String message, {Map<String, dynamic>? extras}) {
-    _log(LogLevel.info, message, extras: extras);
+  void info(String message, {Map<String, dynamic>? extras, LogFeature? feature}) {
+    _log(LogLevel.info, message, extras: extras, feature: feature);
   }
 
   /// Log a warning message
-  void warning(String message, {Object? error, Map<String, dynamic>? extras}) {
-    _log(LogLevel.warning, message, error: error, extras: extras);
+  void warning(String message, {Object? error, Map<String, dynamic>? extras, LogFeature? feature}) {
+    _log(LogLevel.warning, message, error: error, extras: extras, feature: feature);
   }
 
   /// Log an error message
-  void error(String message, {Object? error, StackTrace? stackTrace, Map<String, dynamic>? extras}) {
-    _log(LogLevel.error, message, error: error, stackTrace: stackTrace, extras: extras);
+  void error(String message, {Object? error, StackTrace? stackTrace, Map<String, dynamic>? extras, LogFeature? feature}) {
+    _log(LogLevel.error, message, error: error, stackTrace: stackTrace, extras: extras, feature: feature);
   }
 
-  /// Log a fatal error message
-  void fatal(String message, {Object? error, StackTrace? stackTrace, Map<String, dynamic>? extras}) {
-    _log(LogLevel.fatal, message, error: error, stackTrace: stackTrace, extras: extras);
+  /// Log an fatal error message
+  void fatal(String message, {Object? error, StackTrace? stackTrace, Map<String, dynamic>? extras, LogFeature? feature}) {
+    _log(LogLevel.fatal, message, error: error, stackTrace: stackTrace, extras: extras, feature: feature);
   }
 
-  void _log(LogLevel level, String message, {Object? error, StackTrace? stackTrace, Map<String, dynamic>? extras}) {
+  void _log(LogLevel level, String message, {Object? error, StackTrace? stackTrace, Map<String, dynamic>? extras, LogFeature? feature}) {
     if (!_isInitialized) {
       // Fallback to basic print if logger not initialized
       debugPrint('AppLoggerInjector not initialized. Message: $message');
@@ -122,7 +148,7 @@ class AppLoggerInjector {
 
     for (final handler in _handlers) {
       try {
-        handler(level, message, error: error, stackTrace: stackTrace, extras: extras);
+        handler(level, message, error: error, stackTrace: stackTrace, extras: extras, feature: feature);
       } catch (e) {
         _logger.e('Error in log handler: $e', error: e);
       }

@@ -13,17 +13,22 @@ import 'features/onboarding/presentation/onboarding_screen.dart';
 import 'features/requests/presentation/create_request_screen.dart';
 import 'features/settings/presentation/settings_screen.dart';
 
+class AppRoutes {
+  static const home = '/';
+  static const login = '/login';
+  static const register = '/register';
+  static const createRequest = '/create-request';
+  static const session = '/session/:id';
+  static const onboarding = '/onboarding';
+  static const settings = '/settings';
+}
+
 class AppRouter {
   AppRouter._();
   static final instance = AppRouter._();
-  final String homeRoute = '/';
-  final String loginRoute = '/login';
-  final String registerRoute = '/register';
-  final String createRequestRoute = '/create-request';
-  final String sessionRoute = '/session/:id';
 
   // Provider for initial location, can be overridden
-  final initialLocationProvider = Provider<String>((ref) => '/login');
+  final initialLocationProvider = Provider<String>((ref) => AppRoutes.login);
 
   // Defines the router provider
   late final routerProvider = Provider<GoRouter>((ref) {
@@ -42,39 +47,39 @@ class AppRouter {
         final isLoggedIn = authState.asData?.value != null;
         final isOnboarded = onboardingState.asData?.value ?? false;
 
-        final isLoggingIn = state.uri.toString() == loginRoute || state.uri.toString() == registerRoute;
-        final isOnboarding = state.uri.toString() == '/onboarding';
+        final isLoggingIn = state.uri.toString() == AppRoutes.login || state.uri.toString() == AppRoutes.register;
+        final isOnboarding = state.uri.toString() == AppRoutes.onboarding;
 
         // 1. Not Logged In
         if (!isLoggedIn) {
-          return isLoggingIn ? null : loginRoute;
+          return isLoggingIn ? null : AppRoutes.login;
         }
 
         // 2. Logged In, But Not Onboarded
         if (isLoggedIn && !isOnboarded) {
-          return isOnboarding ? null : '/onboarding';
+          return isOnboarding ? null : AppRoutes.onboarding;
         }
 
         // 3. Logged In & Onboarded
         if (isLoggedIn && isOnboarded) {
           // Prevent going back to login/onboarding
-          if (isLoggingIn || isOnboarding) return homeRoute;
+          if (isLoggingIn || isOnboarding) return AppRoutes.home;
           return null;
         }
 
         return null;
       },
       routes: [
-        GoRoute(path: '/onboarding', builder: (context, state) => const OnboardingScreen()),
-        GoRoute(path: homeRoute, builder: (context, state) => const HomeScreen()),
-        GoRoute(path: loginRoute, builder: (context, state) => const LoginScreen()),
-        GoRoute(path: registerRoute, builder: (context, state) => const RegisterScreen()),
-        GoRoute(path: createRequestRoute, builder: (context, state) => const CreateRequestScreen()),
+        GoRoute(path: AppRoutes.onboarding, builder: (context, state) => const OnboardingScreen()),
+        GoRoute(path: AppRoutes.home, builder: (context, state) => const HomeScreen()),
+        GoRoute(path: AppRoutes.login, builder: (context, state) => const LoginScreen()),
+        GoRoute(path: AppRoutes.register, builder: (context, state) => const RegisterScreen()),
+        GoRoute(path: AppRoutes.createRequest, builder: (context, state) => const CreateRequestScreen()),
         GoRoute(
-          path: sessionRoute,
+          path: AppRoutes.session,
           builder: (context, state) => ChatScreen(sessionId: state.pathParameters['id']!),
         ),
-        GoRoute(path: '/settings', builder: (context, state) => const SettingsScreen()),
+        GoRoute(path: AppRoutes.settings, builder: (context, state) => const SettingsScreen()),
       ],
     );
   });

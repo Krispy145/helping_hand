@@ -2,21 +2,20 @@ import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
 
-abstract class AppTextStyles {
-  // Headings
-  static const TextStyle h1 = TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: AppColors.textPrimary, height: 1.3);
+extension AppTextStylesExtension on BuildContext {
+  TextStyle get h1 => TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: textPrimary, height: 1.3);
 
-  static const TextStyle h2 = TextStyle(fontSize: 24, fontWeight: FontWeight.w600, color: AppColors.textPrimary, height: 1.3);
+  TextStyle get h2 => TextStyle(fontSize: 24, fontWeight: FontWeight.w600, color: textPrimary, height: 1.3);
 
-  static const TextStyle h3 = TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: AppColors.textPrimary, height: 1.3);
+  TextStyle get h3 => TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: textPrimary, height: 1.3);
 
   // Body
-  static const TextStyle bodyLarge = TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: AppColors.textPrimary, height: 1.5);
+  TextStyle get bodyLarge => TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: textPrimary, height: 1.5);
 
-  static const TextStyle bodyMedium = TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: AppColors.textPrimary, height: 1.5);
+  TextStyle get bodyMedium => TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: textPrimary, height: 1.5);
 
-  static const TextStyle bodySmall = TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.textSecondary, height: 1.5);
+  TextStyle get bodySmall => TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: textSecondary, height: 1.5);
 
   // Buttons
-  static const TextStyle button = TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.surface, height: 1.0);
+  TextStyle get button => TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: surface, height: 1);
 }

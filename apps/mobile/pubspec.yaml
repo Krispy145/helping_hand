@@ -49,6 +49,10 @@ dependencies:
   dart_mappable: ^4.6.1
   map:
     path: ../../packages/map
+  image_picker: ^1.2.1
+  path_provider: ^2.1.5
+  permission_handler: ^12.0.1
+  shared_preferences: ^2.5.4
 
 dev_dependencies:
   flutter_test:

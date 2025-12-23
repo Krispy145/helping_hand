@@ -6,3 +6,6 @@ export 'package:latlong2/latlong.dart';
 export 'src/data/repositories/map_repository.dart';
 export 'src/presentation/controllers/map_providers.dart';
 export 'src/presentation/widgets/helping_hand_map.dart';
+export 'src/presentation/widgets/map_location_button.dart';
+export 'src/presentation/widgets/map_radar.dart';
+export 'src/presentation/widgets/map_zoom_buttons.dart';

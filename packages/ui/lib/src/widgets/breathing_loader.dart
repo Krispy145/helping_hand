@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../theme/app_colors.dart';
+import 'package:ui/ui.dart';
 
 class BreathingLoader extends StatefulWidget {
   final double size;
@@ -25,9 +24,9 @@ class _BreathingLoaderState extends State<BreathingLoader> with SingleTickerProv
       duration: const Duration(seconds: 2), // Slow, deep breath
     )..repeat(reverse: true);
 
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    _scaleAnimation = Tween<double>(begin: 0.8, end: 1).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
-    _fadeAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    _fadeAnimation = Tween<double>(begin: 0.5, end: 1).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -50,13 +49,13 @@ class _BreathingLoaderState extends State<BreathingLoader> with SingleTickerProv
               scale: _scaleAnimation.value,
               child: Opacity(
                 opacity: _fadeAnimation.value,
-                child: Container(
-                  decoration: BoxDecoration(shape: BoxShape.circle, color: (widget.color ?? AppColors.primary).withOpacity(0.4)),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(shape: BoxShape.circle, color: (widget.color ?? context.primary).withValues(alpha: 0.4)),
                   child: Center(
                     child: Container(
                       width: widget.size * 0.6,
                       height: widget.size * 0.6,
-                      decoration: BoxDecoration(shape: BoxShape.circle, color: widget.color ?? AppColors.primary),
+                      decoration: BoxDecoration(shape: BoxShape.circle, color: widget.color ?? context.primary),
                     ),
                   ),
                 ),

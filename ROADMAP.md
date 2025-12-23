@@ -41,10 +41,21 @@ This document tracks the high-level progress of the Helping Hand project.
 
 ### **4. Auth & Onboarding 👤**
 *Goal: Smooth, private, and helpful entry.*
-- [ ] **Auth Polish:** Device email autofill, "Calm" UI.
-- [ ] **Profile:** Optional local avatar, privacy-focused.
-- [ ] **Onboarding:** "First Launch" experience & Permissions flow.
-- [ ] **Settings:** Profile & Permission management.
+- [x] **Auth & Onboarding** (Implemented)
+  - [x] Onboarding Flow (First Launch)
+  - [x] Profile Picture (Local)
+  - [x] Settings Screen
+  - [x] UI/UX Polish (Calm Theme)
+  - [x] Dark Theme (Calm Night).
+  - [x] **Settings Logic**
+    - [x] **Theme Toggle**: Light/Dark/System (Persisted)
+    - [x] **Permissions Management**: Check status, Request again, or Open Settings
+    - [x] **AppLifecycle**: Refresh permissions on resume
+    - [x] **Refactor**: Riverpod Architecture (Stateless Screen + Notifier)
+    - [x] **Folder Structure**: Feature-first (`settings`, `onboarding`)
+    - [x] **Fix**: Settings Circular Dependency (`ThemeController`)
+    - [x] **Refactor**: Map Controls extracted to `packages/map`
+- [ ] **Quality:** Resolve all lints, optimize AppLifecycle.
 
 ### **5. Polishing the Core ✨**
 - [ ] **Chat UI:** Apply "Calm Joy" theme to chat.

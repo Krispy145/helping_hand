@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ui/ui.dart';
 import 'package:utils/utils.dart';
 
+import 'features/settings/application/theme_controller.dart';
 import 'flavors.dart';
 import 'router.dart';
 
@@ -32,10 +33,13 @@ class _AppState extends ConsumerState<App> {
   @override
   Widget build(BuildContext context) {
     final router = ref.watch(AppRouter.instance.routerProvider);
+    final themeMode = ref.watch(themeControllerProvider);
 
     return MaterialApp.router(
       title: F.title,
-      theme: AppTheme.lightTheme,
+      theme: context.lightTheme,
+      darkTheme: context.darkTheme,
+      themeMode: themeMode,
       routerConfig: router,
       builder: (context, child) => _flavorBanner(child: child ?? const SizedBox.shrink()),
     );

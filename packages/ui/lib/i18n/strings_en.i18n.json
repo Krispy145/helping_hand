@@ -8,5 +8,48 @@
   "auth": {
     "login": "Login",
     "register": "Register"
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "Welcome to Helping Hand",
+      "description": "A place to ask for help with dignity, and offer help with kindness."
+    },
+    "community": {
+      "title": "Calm & Connected",
+      "description": "Connect with your community in a safe, stress-free environment."
+    },
+    "location": {
+      "title": "Nearby Requests",
+      "description": "We need your location to show you requests for help happening right around you.",
+      "button": "Enable Location"
+    },
+    "notifications": {
+      "title": "Stay Updated",
+      "description": "Get notified when someone offers help or accepts your request.",
+      "button": "Enable Notifications"
+    },
+    "getStarted": "Get Started",
+    "next": "Next"
+  },
+  "settings": {
+    "title": "Settings",
+    "theme": {
+      "title": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "permissions": {
+      "title": "Permissions",
+      "location": "Location",
+      "notifications": "Notifications",
+      "camera": "Camera",
+      "allowed": "Allowed",
+      "denied": "Denied",
+      "required": "Permission Required",
+      "openSettings": "Open Settings",
+      "description": "This feature requires permission. Please enable it in system settings."
+    },
+    "logout": "Logout"
   }
 }

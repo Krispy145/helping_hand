@@ -64,5 +64,9 @@
     <string>Helping Hand needs your location to find requests nearby.</string>
     <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
     <string>Helping Hand needs your location to find requests nearby.</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Helping Hand needs access to your photos to let you set a profile picture.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>Helping Hand needs access to your camera to let you take a profile picture.</string>
 	</dict>
 </plist>

@@ -2,12 +2,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:models/models.dart';
 
+import '../../../core/api_client_provider.dart';
 import '../../../core/listenable_notifier.dart';
 import '../data/auth_repository.dart';
 
 // Dependency Providers
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  return AuthRepository();
+  final dio = ref.watch(apiClientProvider);
+  return AuthRepository(dio: dio);
 });
 
 final secureStorageProvider = Provider<FlutterSecureStorage>((ref) {

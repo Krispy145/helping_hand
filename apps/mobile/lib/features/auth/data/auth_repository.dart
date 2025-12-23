@@ -2,12 +2,10 @@ import 'package:dio/dio.dart';
 import 'package:models/models.dart';
 import 'package:utils/utils.dart';
 
-import '../../../../flavors.dart';
-
 class AuthRepository {
   final Dio _dio;
 
-  AuthRepository({Dio? dio}) : _dio = dio ?? Dio(BaseOptions(baseUrl: F.apiBaseUrl));
+  AuthRepository({required Dio dio}) : _dio = dio;
 
   Future<AuthResponseDto> login(LoginRequestDto request) async {
     final response = await _dio.post<Map<String, dynamic>>(ApiEndpoints.authLogin, data: request.toMap());

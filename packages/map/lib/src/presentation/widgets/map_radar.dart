@@ -18,7 +18,7 @@ class _MapRadarState extends State<MapRadar> with SingleTickerProviderStateMixin
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 2))..repeat();
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 6))..repeat();
   }
 
   @override

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart'; // For Listenable
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:utils/utils.dart';
@@ -7,6 +8,7 @@ import 'features/auth/presentation/register_screen.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/chat/presentation/chat_screen.dart';
 import 'features/home/presentation/home_screen.dart';
+import 'features/onboarding/application/onboarding_state_provider.dart';
 import 'features/onboarding/presentation/onboarding_screen.dart';
 import 'features/requests/presentation/create_request_screen.dart';
 import 'features/settings/presentation/settings_screen.dart';
@@ -29,33 +31,36 @@ class AppRouter {
     return GoRouter(
       initialLocation: initialLoc,
       observers: [LoggingNavigatorObserver()],
-      refreshListenable: ref.read(authProvider.notifier),
+      refreshListenable: Listenable.merge([ref.read(authProvider.notifier), ref.read(onboardingCompletedProvider.notifier)]),
       redirect: (context, state) async {
         final authState = ref.read(authProvider);
+        final onboardingState = ref.read(onboardingCompletedProvider);
+
+        // If loading, maybe show splash? Or null to stay put.
+        if (authState.isLoading || onboardingState.isLoading) return null;
+
         final isLoggedIn = authState.asData?.value != null;
+        final isOnboarded = onboardingState.asData?.value ?? false;
+
         final isLoggingIn = state.uri.toString() == loginRoute || state.uri.toString() == registerRoute;
+        final isOnboarding = state.uri.toString() == '/onboarding';
 
-        // Onboarding Check
-        if (!isLoggedIn && !isLoggingIn) {
-          // We can't easily check async shared prefs here in a sync redirect without blocking or pre-loading.
-          // For MVP, we can assume if not logged in, we check if we should show onboarding.
-          // But simpler pattern: Have a Splash screen that decides.
-          // OR: rely on a provider that loads this state.
-
-          // Let's add a simple check in AppRouter or assume we go to login, and Login redirects to Onboarding if needed?
-          // Actually, usually app starts at Splash -> Checks Auth & Onboarding -> Redirects.
-
-          // For this step, I will add the route, and I'll modify the redirect to support a basic flow.
-          // Ideally we need a 'appStartupProvider'.
+        // 1. Not Logged In
+        if (!isLoggedIn) {
+          return isLoggingIn ? null : loginRoute;
         }
 
-        // Simpler implementation for now:
-        // We will make the route available. The redirection logic requires an async check which GoRouter
-        // handles via a Future, OR we pre-load in main.dart.
-        // Let's go with pre-loading in main.dart passed to the App.
+        // 2. Logged In, But Not Onboarded
+        if (isLoggedIn && !isOnboarded) {
+          return isOnboarding ? null : '/onboarding';
+        }
 
-        if (!isLoggedIn && !isLoggingIn) return loginRoute;
-        if (isLoggedIn && isLoggingIn) return homeRoute;
+        // 3. Logged In & Onboarded
+        if (isLoggedIn && isOnboarded) {
+          // Prevent going back to login/onboarding
+          if (isLoggingIn || isOnboarding) return homeRoute;
+          return null;
+        }
 
         return null;
       },

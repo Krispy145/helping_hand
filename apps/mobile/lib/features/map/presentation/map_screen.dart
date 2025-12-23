@@ -89,7 +89,10 @@ class _MapScreenState extends ConsumerState<MapScreen> with TickerProviderStateM
           ),
 
           // Radar Pulse Overlay (when searching)
-          if (state.isSearching) const Positioned.fill(child: MapRadar(color: Colors.blueAccent)),
+          if (state.isSearching)
+            Positioned.fill(
+              child: MapRadar(color: context.primary, size: MediaQuery.of(context).size.width * 0.8),
+            ),
 
           // Controls
           Positioned(

@@ -56,7 +56,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             constraints: const BoxConstraints(maxWidth: 400),
             child: Card(
               elevation: 4,
-              shadowColor: Colors.black.withValues(alpha: 0.1),
+              shadowColor: context.shadow.withValues(alpha: 0.1),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
               child: Padding(
                 padding: const EdgeInsets.all(32),

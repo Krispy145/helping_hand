@@ -1,0 +1,11 @@
+flutter_native_splash:
+  color: "#FDFBFF" # Light Surface (Calm Joy)
+  color_dark: "#1A1C1C" # Dark Surface
+  image: "assets/flavors/dev/splash_light.png"
+  image_dark: "assets/flavors/dev/splash_dark.png"
+
+  android_12:
+    image: "assets/flavors/dev/splash_light.png"
+    image_dark: "assets/flavors/dev/splash_dark.png"
+    icon_background_color: "#FDFBFF"
+    icon_background_color_dark: "#1A1C1C"

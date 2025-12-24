@@ -8,7 +8,6 @@ import 'package:ui/ui.dart';
 import '../../../router.dart';
 import '../../auth/presentation/widgets/profile_avatar.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../application/theme_controller.dart';
 import 'settings_controller.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -17,7 +16,7 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = Translations.of(context);
-    final themeMode = ref.watch(themeControllerProvider);
+    final themeMode = ref.watch(appThemeProvider).mode;
     final state = ref.watch(settingsControllerProvider);
     final controller = ref.read(settingsControllerProvider.notifier);
 
@@ -38,19 +37,19 @@ class SettingsScreen extends ConsumerWidget {
                     title: Text(t.strings.settings.theme.system),
                     value: ThemeMode.system,
                     groupValue: themeMode,
-                    onChanged: (val) => ref.read(themeControllerProvider.notifier).setTheme(val!),
+                    onChanged: (val) => ref.read(appThemeProvider.notifier).setMode(val!),
                   ),
                   RadioListTile<ThemeMode>(
                     title: Text(t.strings.settings.theme.light),
                     value: ThemeMode.light,
                     groupValue: themeMode,
-                    onChanged: (val) => ref.read(themeControllerProvider.notifier).setTheme(val!),
+                    onChanged: (val) => ref.read(appThemeProvider.notifier).setMode(val!),
                   ),
                   RadioListTile<ThemeMode>(
                     title: Text(t.strings.settings.theme.dark),
                     value: ThemeMode.dark,
                     groupValue: themeMode,
-                    onChanged: (val) => ref.read(themeControllerProvider.notifier).setTheme(val!),
+                    onChanged: (val) => ref.read(appThemeProvider.notifier).setMode(val!),
                   ),
                 ],
               ),
@@ -94,8 +93,26 @@ class SettingsScreen extends ConsumerWidget {
               width: double.infinity,
               child: OutlinedButton(
                 onPressed: () {
-                  ref.read(authProvider.notifier).logout();
-                  context.go(AppRoutes.login);
+                  showDialog<void>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Logout'),
+                      content: const Text('Are you sure you want to log out? This will clear your session and local data.'),
+                      actions: [
+                        TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
+                        TextButton(
+                          onPressed: () async {
+                            Navigator.of(context).pop(); // Close dialog
+                            await ref.read(authProvider.notifier).logout();
+                            if (context.mounted) {
+                              context.go(AppRoutes.login);
+                            }
+                          },
+                          child: Text('Logout', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                        ),
+                      ],
+                    ),
+                  );
                 },
                 child: Text(t.strings.settings.logout),
               ),

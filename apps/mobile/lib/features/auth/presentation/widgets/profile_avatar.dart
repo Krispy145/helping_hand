@@ -11,6 +11,8 @@ class ProfileAvatar extends StatefulWidget {
   final double radius;
   final bool editable;
 
+  static const String prefKey = 'profile_image_path';
+
   const ProfileAvatar({super.key, this.radius = 40, this.editable = false});
 
   @override
@@ -20,7 +22,6 @@ class ProfileAvatar extends StatefulWidget {
 class _ProfileAvatarState extends State<ProfileAvatar> {
   File? _imageFile;
   final ImagePicker _picker = ImagePicker();
-  static const String _prefKey = 'profile_image_path';
 
   @override
   void initState() {
@@ -30,7 +31,7 @@ class _ProfileAvatarState extends State<ProfileAvatar> {
 
   Future<void> _loadProfileImage() async {
     final prefs = await SharedPreferences.getInstance();
-    final path = prefs.getString(_prefKey);
+    final path = prefs.getString(ProfileAvatar.prefKey);
     if (path != null) {
       final file = File(path);
       // ignore: avoid_slow_async_io
@@ -65,7 +66,7 @@ class _ProfileAvatarState extends State<ProfileAvatar> {
 
         // Persist path
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setString(_prefKey, newPath);
+        await prefs.setString(ProfileAvatar.prefKey, newPath);
       }
     } catch (e) {
       if (mounted) {

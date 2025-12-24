@@ -41,4 +41,12 @@ class OnboardingCompletedNotifier extends AsyncNotifier<bool> with ListenableNot
     final prefs = ref.read(sharedPreferencesProvider);
     return prefs.getStringList(_keySteps) ?? [];
   }
+
+  /// Resets onboarding state (e.g. on logout)
+  Future<void> reset() async {
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.remove(_keyCompleted);
+    await prefs.remove(_keySteps);
+    state = const AsyncValue.data(false);
+  }
 }

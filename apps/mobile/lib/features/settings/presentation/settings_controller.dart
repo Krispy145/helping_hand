@@ -18,8 +18,8 @@ class SettingsController extends _$SettingsController {
       }
     });
 
-    // Initial check
-    checkPermissions();
+    // Initial check assigned to microtask to avoid "reading state of uninitialized provider"
+    Future.microtask(() => checkPermissions());
 
     return const SettingsState.initial();
   }

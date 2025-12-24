@@ -1,8 +1,4 @@
-enum Flavor {
-  dev,
-  stg,
-  prod,
-}
+enum Flavor { dev, stg, prod }
 
 class F {
   static late final Flavor appFlavor;
@@ -30,5 +26,4 @@ class F {
         return 'https://api.helpinghand.com';
     }
   }
-
 }

@@ -4,8 +4,11 @@ import 'package:models/models.dart';
 
 import '../../../core/api_client_provider.dart';
 import '../../../core/listenable_notifier.dart';
+import '../../../core/shared_preferences_provider.dart';
 import '../../../core/storage/logging_secure_storage.dart';
+import '../../onboarding/application/onboarding_state_provider.dart';
 import '../data/auth_repository.dart';
+import '../presentation/widgets/profile_avatar.dart';
 
 // Dependency Providers
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
@@ -68,7 +71,18 @@ class AuthNotifier extends AsyncNotifier<UserDto?> with ListenableNotifier {
   }
 
   Future<void> logout() async {
+    // 1. Clear Auth Token
     await _storage.delete(key: _tokenKey);
+
+    // 2. Clear User Preferences (Profile Image, etc)
+    // We access SharedPreferences directly or via provider if we inject it.
+    // Since this is a Notifier, we can use ref.read.
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.remove(ProfileAvatar.prefKey);
+
+    // 3. Reset Onboarding (as requested by user)
+    await ref.read(onboardingCompletedProvider.notifier).reset();
+
     state = const AsyncValue.data(null);
   }
 }

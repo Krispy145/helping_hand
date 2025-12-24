@@ -51,10 +51,10 @@ class _MapScreenState extends ConsumerState<MapScreen> with TickerProviderStateM
                         decoration: BoxDecoration(
                           color: context.primary,
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
-                          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 4, offset: const Offset(0, 2))],
+                          border: Border.all(color: context.surface, width: 2),
+                          boxShadow: [BoxShadow(color: context.shadow.withValues(alpha: 0.2), blurRadius: 4, offset: const Offset(0, 2))],
                         ),
-                        child: const Icon(Icons.handshake, color: Colors.white, size: 20),
+                        child: Icon(Icons.handshake, color: context.onPrimary, size: 20),
                       ),
                     ),
                   );
@@ -71,12 +71,12 @@ class _MapScreenState extends ConsumerState<MapScreen> with TickerProviderStateM
                     height: 24,
                     child: DecoratedBox(
                       decoration: BoxDecoration(
-                        color: Colors.blueAccent,
+                        color: context.information,
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
-                        boxShadow: [BoxShadow(color: Colors.blueAccent.withValues(alpha: 0.4), blurRadius: 8, spreadRadius: 2)],
+                        border: Border.all(color: context.surface, width: 2),
+                        boxShadow: [BoxShadow(color: context.information.withValues(alpha: 0.4), blurRadius: 8, spreadRadius: 2)],
                       ),
-                      child: const Center(child: Icon(Icons.circle, size: 12, color: Colors.white)),
+                      child: Center(child: Icon(Icons.circle, size: 12, color: context.onInformation)),
                     ),
                   ),
                 );

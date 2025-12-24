@@ -2,19 +2,19 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 	<dict>
-    <key>CFBundleURLTypes</key>
-    <array>
-      <dict>
-        <key>CFBundleTypeRole</key>
-        <string>Editor</string>
-        <key>CFBundleURLName</key>
-        <string>com.helpinghand</string>
-        <key>CFBundleURLSchemes</key>
-        <array>
-          <string>helpinghand</string>
-        </array>
-      </dict>
-    </array>
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+				<key>CFBundleURLName</key>
+				<string>com.helpinghand</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>helpinghand</string>
+				</array>
+			</dict>
+		</array>
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>
@@ -38,7 +38,7 @@
 		<key>LSRequiresIPhoneOS</key>
 		<true/>
 		<key>UILaunchStoryboardName</key>
-		<string>LaunchScreen</string>
+		<string>$(ASSET_PREFIX)LaunchScreen</string>
 		<key>UIMainStoryboardFile</key>
 		<string>Main</string>
 		<key>UISupportedInterfaceOrientations</key>
@@ -60,13 +60,13 @@
 		<true/>
 		<key>UIStatusBarHidden</key>
 		<false/>
-    <key>NSLocationWhenInUseUsageDescription</key>
-    <string>Helping Hand needs your location to find requests nearby.</string>
-    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-    <string>Helping Hand needs your location to find requests nearby.</string>
-    <key>NSPhotoLibraryUsageDescription</key>
-    <string>Helping Hand needs access to your photos to let you set a profile picture.</string>
-    <key>NSCameraUsageDescription</key>
-    <string>Helping Hand needs access to your camera to let you take a profile picture.</string>
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>Helping Hand needs your location to find requests nearby.</string>
+		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+		<string>Helping Hand needs your location to find requests nearby.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>Helping Hand needs access to your photos to let you set a profile picture.</string>
+		<key>NSCameraUsageDescription</key>
+		<string>Helping Hand needs access to your camera to let you take a profile picture.</string>
 	</dict>
 </plist>

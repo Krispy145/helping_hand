@@ -1,22 +1,59 @@
 flavors:
   dev:
     app:
-        name: "Helping Hand (Dev)"
+      name: "Helping Hand (Dev)"
     android:
-        applicationId: "com.helping.dev"
+      applicationId: "com.helping.dev"
+      icon: "assets/flavors/dev/icon.png"
+      # adaptiveIcon:
+      #   foreground: "assets/flavors/dev/icon_adaptive_fg.png"
+      #   background: "assets/flavors/dev/icon_adaptive_bg.png"
+      #   monochrome: "assets/flavors/dev/icon_monochrome.png"
     ios:
-        bundleId: "com.helping.dev"
+      bundleId: "com.helping.dev"
+      icon: "assets/flavors/dev/icon.png"
   stg:
     app:
-        name: "Helping Hand (Stg)"
+      name: "Helping Hand (Stg)"
     android:
-        applicationId: "com.helping.stg"
+      applicationId: "com.helping.stg"
+      icon: "assets/flavors/stg/icon.png"
+      # adaptiveIcon:
+      #   foreground: "assets/flavors/stg/icon_adaptive_fg.png"
+      #   background: "assets/flavors/stg/icon_adaptive_bg.png"
+      #   monochrome: "assets/flavors/stg/icon_monochrome.png"
     ios:
-        bundleId: "com.helping.stg"
+      bundleId: "com.helping.stg"
+      icon: "assets/flavors/stg/icon.png"
   prod:
     app:
-        name: "Helping Hand"
+      name: "Helping Hand"
     android:
-        applicationId: "com.helping.app"
+      applicationId: "com.helping.app"
+      icon: "assets/flavors/prod/icon.png"
+      # adaptiveIcon:
+      #   foreground: "assets/flavors/prod/icon_adaptive_fg.png"
+      #   background: "assets/flavors/prod/icon_adaptive_bg.png"
+      #   monochrome: "assets/flavors/prod/icon_monochrome.png"
     ios:
-        bundleId: "com.helping.app"
+      bundleId: "com.helping.app"
+      icon: "assets/flavors/prod/icon.png"
+
+instructions:
+  - assets:download
+  - assets:extract
+  - android:androidManifest
+  - android:flavorizrGradle
+  - android:buildGradle
+  - android:dummyAssets
+  - android:icons
+  - ios:podfile
+  - ios:xcconfig
+  - ios:buildTargets
+  - ios:schema
+  - ios:dummyAssets
+  - ios:icons
+  - ios:plist
+  - ios:launchScreen
+  - assets:clean
+  - ide:config

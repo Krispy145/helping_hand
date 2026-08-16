@@ -3,32 +3,58 @@ import 'package:models/models.dart';
 
 import '../data/request_repository.dart';
 
-// Provider for fetching nearby requests
-final nearbyRequestsProvider = FutureProvider.autoDispose.family<List<RequestDto>, ({double lat, double lng, double radius})>((ref, params) async {
-  final repository = ref.watch(requestRepositoryProvider);
-  // Simulate network latency for "Loading State UI" visibility
-  await Future<void>.delayed(const Duration(seconds: 1));
+final nearbyRequestsProvider = AsyncNotifierProvider<NearbyRequestsNotifier, List<RequestDto>>(NearbyRequestsNotifier.new);
 
-  return repository.getNearbyRequests(lat: params.lat, lng: params.lng, radius: params.radius);
-});
+class NearbyRequestsNotifier extends AsyncNotifier<List<RequestDto>> {
+  NearbyBounds _bounds = NearbyBounds.capeTownViewport;
 
-final requestProvider = AsyncNotifierProvider<RequestNotifier, void>(() {
-  return RequestNotifier();
-});
+  NearbyBounds get bounds => _bounds;
+
+  @override
+  Future<List<RequestDto>> build() {
+    return _load();
+  }
+
+  Future<List<RequestDto>> _load() {
+    return ref.read(requestRepositoryProvider).getNearbyRequests(_bounds);
+  }
+
+  Future<List<RequestDto>> refresh({NearbyBounds? bounds}) async {
+    if (bounds != null) _bounds = bounds;
+    if (state.asData?.value == null) {
+      state = const AsyncLoading();
+    }
+    state = await AsyncValue.guard(_load);
+    return state.asData?.value ?? [];
+  }
+
+  void patchStatus(String requestId, RequestStatusDto status) {
+    final requests = state.asData?.value;
+    if (requests == null) return;
+
+    if (status == RequestStatusDto.COMPLETED || status == RequestStatusDto.CANCELLED) {
+      state = AsyncData(requests.where((request) => request.id != requestId).toList());
+      return;
+    }
+
+    state = AsyncData([
+      for (final request in requests)
+        if (request.id == requestId) request.copyWith(status: status) else request,
+    ]);
+  }
+}
+
+final requestProvider = AsyncNotifierProvider<RequestNotifier, void>(RequestNotifier.new);
 
 class RequestNotifier extends AsyncNotifier<void> {
   @override
-  Future<void> build() async {
-    // No initial data load yet
-  }
+  Future<void> build() async {}
 
   Future<void> createRequest(CreateRequestDto dto) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       await ref.read(requestRepositoryProvider).createRequest(dto);
-      // Invalidate the nearby feed so it refreshes (if user is in range)
-      // We don't have the params here easily, so we might just invalidate all or logic later.
-      // For now, simple creation.
+      await ref.read(nearbyRequestsProvider.notifier).refresh();
     });
   }
 }

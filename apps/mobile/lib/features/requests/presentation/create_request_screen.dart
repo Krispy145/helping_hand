@@ -35,8 +35,8 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen> {
         description: _descController.text,
         category: _categoryController.text,
         urgency: _urgency,
-        lat: 40.7128, // Hardcoded for MVP
-        lng: -74.0060,
+        lat: -33.9249, // Cape Town CBD — matches approx seed bins
+        lng: 18.4241,
       );
 
       try {

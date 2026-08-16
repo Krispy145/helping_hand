@@ -15,6 +15,7 @@ const event_emitter_1 = require("@nestjs/event-emitter");
 const request_created_event_1 = require("./events/request-created.event");
 const prisma_service_1 = require("../infrastructure/persistence/prisma/prisma.service");
 const client_1 = require("@prisma/client");
+const public_serializers_1 = require("../common/public-serializers");
 let RequestsService = class RequestsService {
     prisma;
     eventEmitter;
@@ -34,29 +35,66 @@ let RequestsService = class RequestsService {
                 lng: dto.lng,
                 status: client_1.RequestStatus.PENDING_VETTING,
             },
-            include: {
-                user: true,
-            },
         });
         this.eventEmitter.emit('request.created', new request_created_event_1.RequestCreatedEvent(request.id, request.title, request.description));
-        return request;
+        return (0, public_serializers_1.toPublicRequest)(request);
     }
     async findAll() {
-        return this.prisma.request.findMany({
-            include: { user: true },
+        const requests = await this.prisma.request.findMany({
             orderBy: { createdAt: 'desc' },
         });
+        return requests.map((request) => (0, public_serializers_1.toPublicRequest)(request));
     }
     async findAllNearby(lat, lng, radiusInKm) {
-        const result = await this.prisma.$queryRaw `
-      SELECT *, 
-      ( 6371 * acos( cos( radians(${lat}) ) * cos( radians( lat ) ) * cos( radians( lng ) - radians(${lng}) ) + sin( radians(${lat}) ) * sin( radians( lat ) ) ) ) AS distance 
+        const nearby = await this.prisma.$queryRaw `
+      SELECT id
       FROM "Request"
-      WHERE status = 'APPROVED'
-      AND ( 6371 * acos( cos( radians(${lat}) ) * cos( radians( lat ) ) * cos( radians( lng ) - radians(${lng}) ) + sin( radians(${lat}) ) * sin( radians( lat ) ) ) ) < ${radiusInKm}
-      ORDER BY distance ASC
+      WHERE status IN ('APPROVED', 'IN_PROGRESS')
+        AND lat IS NOT NULL
+        AND lng IS NOT NULL
+        AND (
+          6371 * acos(
+            cos(radians(${lat})) * cos(radians(lat)) * cos(radians(lng) - radians(${lng}))
+            + sin(radians(${lat})) * sin(radians(lat))
+          )
+        ) < ${radiusInKm}
+      ORDER BY (
+        6371 * acos(
+          cos(radians(${lat})) * cos(radians(lat)) * cos(radians(lng) - radians(${lng}))
+          + sin(radians(${lat})) * sin(radians(lat))
+        )
+      ) ASC
+      LIMIT 200
     `;
-        return result;
+        return this.hydratePublicRequests(nearby.map((row) => row.id));
+    }
+    async findAllInBounds(minLat, minLng, maxLat, maxLng) {
+        const south = Math.min(minLat, maxLat);
+        const north = Math.max(minLat, maxLat);
+        const west = Math.min(minLng, maxLng);
+        const east = Math.max(minLng, maxLng);
+        const requests = await this.prisma.request.findMany({
+            where: {
+                status: { in: [client_1.RequestStatus.APPROVED, client_1.RequestStatus.IN_PROGRESS] },
+                lat: { gte: south, lte: north },
+                lng: { gte: west, lte: east },
+            },
+            orderBy: { createdAt: 'desc' },
+            take: 200,
+        });
+        return requests.map((request) => (0, public_serializers_1.toPublicRequest)(request));
+    }
+    async hydratePublicRequests(ids) {
+        if (ids.length === 0)
+            return [];
+        const requests = await this.prisma.request.findMany({
+            where: { id: { in: ids } },
+        });
+        const byId = new Map(requests.map((request) => [request.id, request]));
+        return ids
+            .map((id) => byId.get(id))
+            .filter((request) => request != null)
+            .map((request) => (0, public_serializers_1.toPublicRequest)(request));
     }
 };
 exports.RequestsService = RequestsService;

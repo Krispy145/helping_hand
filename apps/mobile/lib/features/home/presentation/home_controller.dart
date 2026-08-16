@@ -6,7 +6,7 @@ part 'home_controller.g.dart';
 class HomeController extends _$HomeController {
   @override
   int build() {
-    return 0; // 0: Map, 1: Feed
+    return 0; // 0: Map, 1: Feed, 2: Chats
   }
 
   void setTab(int index) {

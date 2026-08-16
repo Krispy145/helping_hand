@@ -3,7 +3,14 @@ import 'package:utils/utils.dart';
 
 /// A wrapper around [FlutterSecureStorage] that logs write operations.
 class LoggingSecureStorage extends FlutterSecureStorage {
-  const LoggingSecureStorage({super.iOptions, super.aOptions, super.lOptions, super.wOptions, super.mOptions, super.webOptions});
+  const LoggingSecureStorage({
+    super.iOptions = const IOSOptions(accessibility: KeychainAccessibility.first_unlock),
+    super.aOptions,
+    super.lOptions,
+    super.wOptions,
+    super.mOptions,
+    super.webOptions,
+  });
 
   @override
   Future<void> write({

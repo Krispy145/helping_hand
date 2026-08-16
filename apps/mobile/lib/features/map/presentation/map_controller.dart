@@ -9,14 +9,12 @@ part 'map_controller.g.dart';
 
 @riverpod
 class MapController extends _$MapController {
+  static const _minRadarDuration = Duration(milliseconds: 1500);
+  DateTime? _searchingSince;
+  int _searchGeneration = 0;
+
   @override
   MapState build() {
-    // Initial load logic if needed, or just return initial state
-    // We can listen to userLocationProvider here to update userLocation in state?
-    // Or just let the UI watch userLocationProvider directly for the "My Location" marker,
-    // but for "Recenter" logic, the controller needs to know.
-
-    // For now, simple build.
     return const MapState();
   }
 
@@ -28,17 +26,35 @@ class MapController extends _$MapController {
     state = state.copyWith(requests: requests);
   }
 
-  Future<void> searchArea(LatLng center, double radius) async {
-    state = state.copyWith(isSearching: true, center: center);
-    try {
-      // Simulate "Searching" delay for UI effect (Radar Pulse)
-      await Future<void>.delayed(const Duration(seconds: 2));
+  Future<void> setSearching(bool isSearching) async {
+    if (isSearching) {
+      _searchGeneration++;
+      _searchingSince = DateTime.now();
+      state = state.copyWith(isSearching: true);
+      return;
+    }
 
-      // Force refresh the provider to get new data
-      final requests = await ref.refresh(nearbyRequestsProvider((lat: center.latitude, lng: center.longitude, radius: radius)).future);
-      state = state.copyWith(isSearching: false, requests: requests);
+    final generation = _searchGeneration;
+    final started = _searchingSince ?? DateTime.now();
+    final remaining = _minRadarDuration - DateTime.now().difference(started);
+    if (remaining > Duration.zero) {
+      await Future<void>.delayed(remaining);
+    }
+    if (generation != _searchGeneration) return;
+    _searchingSince = null;
+    state = state.copyWith(isSearching: false);
+  }
+
+  Future<void> searchArea(LatLng center, double radius) async {
+    state = state.copyWith(center: center);
+    await setSearching(true);
+    try {
+      final requests = await ref.read(nearbyRequestsProvider.notifier).refresh();
+      state = state.copyWith(requests: requests);
     } catch (e) {
-      state = state.copyWith(isSearching: false, error: e);
+      state = state.copyWith(error: e);
+    } finally {
+      await setSearching(false);
     }
   }
 }

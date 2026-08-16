@@ -9,6 +9,34 @@ final requestRepositoryProvider = Provider<RequestRepository>((ref) {
   return RequestRepository(ref.watch(dioProvider));
 });
 
+class NearbyBounds {
+  final double minLat;
+  final double minLng;
+  final double maxLat;
+  final double maxLng;
+
+  const NearbyBounds({
+    required this.minLat,
+    required this.minLng,
+    required this.maxLat,
+    required this.maxLng,
+  });
+
+  static const capeTownViewport = NearbyBounds(
+    minLat: -33.96,
+    minLng: 18.38,
+    maxLat: -33.89,
+    maxLng: 18.47,
+  );
+
+  Map<String, double> toQuery() => {
+    'minLat': minLat,
+    'minLng': minLng,
+    'maxLat': maxLat,
+    'maxLng': maxLng,
+  };
+}
+
 class RequestRepository {
   final Dio _dio;
 
@@ -18,21 +46,20 @@ class RequestRepository {
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.requests,
-        data: dto.toJson(), // dart_mappable extension
+        data: dto.toJson(),
       );
-      // Ensure the response data is parsed correctly using MapperContainer if explicit decoding needed,
-      // or rely on matching json structure.
-      // Assuming response.data is the Map<String, dynamic> of Request object.
       return RequestDtoMapper.fromMap(response.data!);
     } catch (e) {
-      // Basic error handling for MVP
       rethrow;
     }
   }
 
-  Future<List<RequestDto>> getNearbyRequests({double lat = 40.7128, double lng = -74.0060, double radius = 10}) async {
+  Future<List<RequestDto>> getNearbyRequests(NearbyBounds bounds) async {
     try {
-      final response = await _dio.get<List<dynamic>>(ApiEndpoints.requestsNearby, queryParameters: {'lat': lat, 'lng': lng, 'radius': radius});
+      final response = await _dio.get<List<dynamic>>(
+        ApiEndpoints.requestsNearby,
+        queryParameters: bounds.toQuery(),
+      );
       final list = response.data!;
       return list.map((e) => RequestDtoMapper.fromMap(e as Map<String, dynamic>)).toList();
     } catch (e) {

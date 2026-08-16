@@ -4,6 +4,7 @@ import * as bcrypt from 'bcrypt';
 import type { IUserRepository } from '../domain/repositories/user.repository.interface';
 import { User, UserRole } from '../domain/entities/user.entity';
 import { RegisterRequestDto } from './dto/register-request.dto';
+import { toPublicUser } from '../common/public-serializers';
 
 @Injectable()
 export class AuthService {
@@ -29,18 +30,11 @@ export class AuthService {
     const payload = { email: user.email, sub: user.id, role: user.role };
     return {
       access_token: await this.jwtService.signAsync(payload),
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        created_at: user.createdAt,
-        updated_at: user.updatedAt,
-      },
+      user: toPublicUser(user, { includeEmail: true }),
     };
   }
 
-  async register(dto: RegisterRequestDto): Promise<User> {
+  async register(dto: RegisterRequestDto) {
     const existingUser = await this.userRepository.findByEmail(dto.email);
     if (existingUser) {
       throw new ConflictException('User with this email already exists');
@@ -66,23 +60,10 @@ export class AuthService {
     const payload = { email: user.email, sub: user.id, role: user.role };
     return {
       access_token: await this.jwtService.signAsync(payload),
-      user: {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          created_at: user.createdAt,
-          updated_at: user.updatedAt,
-      }
-    } as any; // Type casting for now since return type of method says Promise<User> but controller expects AuthResponseDto wrapper.
+      user: toPublicUser(user, { includeEmail: true }),
+    };
   }
   async getUserById(id: string): Promise<User | null> {
-    const user = await this.userRepository.findById(id);
-    if (user) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { password, ...result } = user;
-        return result as User;
-    }
-    return null;
+    return this.userRepository.findById(id);
   }
 }

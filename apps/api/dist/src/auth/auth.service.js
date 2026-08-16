@@ -50,6 +50,7 @@ const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
 const bcrypt = __importStar(require("bcrypt"));
 const user_entity_1 = require("../domain/entities/user.entity");
+const public_serializers_1 = require("../common/public-serializers");
 let AuthService = class AuthService {
     userRepository;
     jwtService;
@@ -72,14 +73,7 @@ let AuthService = class AuthService {
         const payload = { email: user.email, sub: user.id, role: user.role };
         return {
             access_token: await this.jwtService.signAsync(payload),
-            user: {
-                id: user.id,
-                email: user.email,
-                name: user.name,
-                role: user.role,
-                created_at: user.createdAt,
-                updated_at: user.updatedAt,
-            },
+            user: (0, public_serializers_1.toPublicUser)(user, { includeEmail: true }),
         };
     }
     async register(dto) {
@@ -100,23 +94,11 @@ let AuthService = class AuthService {
         const payload = { email: user.email, sub: user.id, role: user.role };
         return {
             access_token: await this.jwtService.signAsync(payload),
-            user: {
-                id: user.id,
-                email: user.email,
-                name: user.name,
-                role: user.role,
-                created_at: user.createdAt,
-                updated_at: user.updatedAt,
-            }
+            user: (0, public_serializers_1.toPublicUser)(user, { includeEmail: true }),
         };
     }
     async getUserById(id) {
-        const user = await this.userRepository.findById(id);
-        if (user) {
-            const { password, ...result } = user;
-            return result;
-        }
-        return null;
+        return this.userRepository.findById(id);
     }
 };
 exports.AuthService = AuthService;

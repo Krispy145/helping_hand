@@ -19,6 +19,7 @@ const login_request_dto_1 = require("./dto/login-request.dto");
 const register_request_dto_1 = require("./dto/register-request.dto");
 const swagger_1 = require("@nestjs/swagger");
 const jwt_auth_guard_1 = require("./jwt-auth.guard");
+const public_serializers_1 = require("../common/public-serializers");
 let AuthController = class AuthController {
     authService;
     constructor(authService) {
@@ -39,14 +40,7 @@ let AuthController = class AuthController {
         if (!user) {
             throw new common_1.UnauthorizedException('User not found');
         }
-        return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            role: user.role,
-            created_at: user.createdAt,
-            updated_at: user.updatedAt,
-        };
+        return (0, public_serializers_1.toPublicUser)(user, { includeEmail: true });
     }
 };
 exports.AuthController = AuthController;

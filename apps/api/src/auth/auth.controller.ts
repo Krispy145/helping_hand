@@ -4,6 +4,7 @@ import { LoginRequestDto } from './dto/login-request.dto';
 import { RegisterRequestDto } from './dto/register-request.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { toPublicUser } from '../common/public-serializers';
 
 @ApiBearerAuth()
 @ApiTags('auth')
@@ -41,17 +42,8 @@ export class AuthController {
     // req.user is populated by JwtStrategy (userId, email, role)
     const user = await this.authService.getUserById(req.user.userId);
     if (!user) {
-        throw new UnauthorizedException('User not found');
+      throw new UnauthorizedException('User not found');
     }
-    // Return UserDto (without password)
-    // We can reuse manual mapping or use class-transformer if configured
-    return {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        created_at: user.createdAt,
-        updated_at: user.updatedAt,
-    };
+    return toPublicUser(user, { includeEmail: true });
   }
 }

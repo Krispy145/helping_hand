@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart'; // For Listenable
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:utils/utils.dart';
@@ -33,10 +33,15 @@ class AppRouter {
   // Defines the router provider
   late final routerProvider = Provider<GoRouter>((ref) {
     final initialLoc = ref.watch(initialLocationProvider);
+    final refresh = ValueNotifier<int>(0);
+    ref.onDispose(refresh.dispose);
+    ref.listen(authProvider, (_, __) => refresh.value++);
+    ref.listen(onboardingCompletedProvider, (_, __) => refresh.value++);
+
     return GoRouter(
       initialLocation: initialLoc,
       observers: [LoggingNavigatorObserver()],
-      refreshListenable: Listenable.merge([ref.read(authProvider.notifier), ref.read(onboardingCompletedProvider.notifier)]),
+      refreshListenable: refresh,
       redirect: (context, state) async {
         final authState = ref.read(authProvider);
         final onboardingState = ref.read(onboardingCompletedProvider);

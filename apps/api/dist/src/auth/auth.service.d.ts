@@ -1,6 +1,6 @@
 import { JwtService } from '@nestjs/jwt';
 import type { IUserRepository } from '../domain/repositories/user.repository.interface';
-import { User, UserRole } from '../domain/entities/user.entity';
+import { User } from '../domain/entities/user.entity';
 import { RegisterRequestDto } from './dto/register-request.dto';
 export declare class AuthService {
     private readonly userRepository;
@@ -13,11 +13,21 @@ export declare class AuthService {
             id: string;
             email: string;
             name: string | null | undefined;
-            role: UserRole;
+            role: string;
             created_at: Date;
             updated_at: Date;
         };
     }>;
-    register(dto: RegisterRequestDto): Promise<User>;
+    register(dto: RegisterRequestDto): Promise<{
+        access_token: string;
+        user: {
+            id: string;
+            email: string;
+            name: string | null | undefined;
+            role: string;
+            created_at: Date;
+            updated_at: Date;
+        };
+    }>;
     getUserById(id: string): Promise<User | null>;
 }

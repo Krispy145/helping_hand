@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:models/models.dart';
 import 'package:ui/ui.dart';
 
 import '../../auth/providers/auth_provider.dart';
+import '../../requests/providers/request_provider.dart';
 import '../application/chat_provider.dart';
+import '../data/chat_repository.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   final String sessionId;
@@ -15,15 +19,105 @@ class ChatScreen extends ConsumerStatefulWidget {
 
 class _ChatScreenState extends ConsumerState<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
+  bool _busy = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _cancelAssist() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cancel assist?'),
+        content: const Text('This chat will end and the request will stay open on the map for someone else.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Keep chatting')),
+          TextButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Cancel assist')),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _busy = true);
+    try {
+      final requestId = ref.read(sessionDetailsProvider(widget.sessionId)).asData?.value.requestId;
+      await ref.read(chatRepositoryProvider).cancelAssist(widget.sessionId);
+      if (requestId != null) {
+        ref.read(nearbyRequestsProvider.notifier).patchStatus(requestId, RequestStatusDto.APPROVED);
+      }
+      await ref.read(nearbyRequestsProvider.notifier).refresh();
+      ref.invalidate(mySessionsProvider);
+      if (mounted) {
+        context.pop();
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Assist cancelled. The request is open again.')));
+      }
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Could not cancel assist: $error')));
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _completeAssist() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Mark assistance offered?'),
+        content: const Text('This will complete the request and remove it from the map.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Not yet')),
+          TextButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Assistance offered')),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _busy = true);
+    try {
+      final completed = await ref.read(chatRepositoryProvider).completeAssist(widget.sessionId);
+      ref.invalidate(sessionDetailsProvider(widget.sessionId));
+      ref.read(nearbyRequestsProvider.notifier).patchStatus(completed.requestId, RequestStatusDto.COMPLETED);
+      await ref.read(nearbyRequestsProvider.notifier).refresh();
+      ref.invalidate(mySessionsProvider);
+      if (mounted) {
+        context.pop();
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Request marked completed.')));
+      }
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Could not complete request: $error')));
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final chatAsync = ref.watch(chatProvider(widget.sessionId));
+    final sessionAsync = ref.watch(sessionDetailsProvider(widget.sessionId));
     final user = ref.watch(authProvider).value;
+    final otherName = sessionAsync.asData?.value.otherPartyName(user?.id) ?? 'Chat';
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chat', style: context.h3),
+        title: Column(
+          children: [
+            Text(otherName, style: context.h3),
+            if (sessionAsync.asData != null)
+              Text(
+                sessionAsync.asData!.value.request.title,
+                style: context.bodySmall.copyWith(color: context.textSecondary),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+          ],
+        ),
         centerTitle: true,
         actions: [
           chatAsync.when(
@@ -58,6 +152,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   itemCount: state.messages.length,
                   itemBuilder: (context, index) {
                     final msg = state.messages[index];
+                    if (index == 0) {
+                      return _RequestIntroCard(content: msg.content);
+                    }
                     final isMe = msg.senderId == user?.id;
                     return Align(
                       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
@@ -87,48 +184,111 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           ),
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Column(
                 children: [
-                  Expanded(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: context.surface,
-                        borderRadius: BorderRadius.circular(24),
-                        boxShadow: [BoxShadow(color: context.shadow.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4))],
-                      ),
-                      child: TextField(
-                        controller: _controller,
-                        style: context.bodyLarge,
-                        decoration: InputDecoration(
-                          hintText: 'Type a message...',
-                          hintStyle: context.bodyLarge.copyWith(color: context.textSecondary),
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                  if (sessionAsync.asData?.value.isActive == true) ...[
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: _busy ? null : _cancelAssist,
+                            child: const Text('Cancel assist'),
+                          ),
                         ),
-                        textCapitalization: TextCapitalization.sentences,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: FilledButton(
+                            onPressed: _busy ? null : _completeAssist,
+                            child: const Text('Assistance offered'),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                  ] else if (sessionAsync.hasValue) ...[
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Text(
+                        sessionAsync.asData!.value.status == 'COMPLETED' ? 'This request is completed.' : 'This assist was cancelled.',
+                        style: context.bodySmall,
+                        textAlign: TextAlign.center,
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  CircleAvatar(
-                    backgroundColor: context.primary,
-                    radius: 24,
-                    child: IconButton(
-                      icon: Icon(Icons.send_rounded, color: context.surface, size: 20),
-                      onPressed: () {
-                        final content = _controller.text.trim();
-                        if (content.isNotEmpty && user != null) {
-                          ref.read(chatProvider(widget.sessionId).notifier).sendMessage(content, user.id);
-                          _controller.clear();
-                        }
-                      },
-                    ),
+                  ],
+                  Row(
+                    children: [
+                      Expanded(
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: context.surface,
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: [BoxShadow(color: context.shadow.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4))],
+                          ),
+                          child: TextField(
+                            controller: _controller,
+                            enabled: sessionAsync.asData?.value.isActive != false && !_busy,
+                            style: context.bodyLarge,
+                            decoration: InputDecoration(
+                              hintText: 'Type a message...',
+                              hintStyle: context.bodyLarge.copyWith(color: context.textSecondary),
+                              border: InputBorder.none,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                            ),
+                            textCapitalization: TextCapitalization.sentences,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      CircleAvatar(
+                        backgroundColor: context.primary,
+                        radius: 24,
+                        child: IconButton(
+                          icon: Icon(Icons.send_rounded, color: context.surface, size: 20),
+                          onPressed: _busy
+                              ? null
+                              : () {
+                                  final content = _controller.text.trim();
+                                  if (content.isNotEmpty && user != null) {
+                                    ref.read(chatProvider(widget.sessionId).notifier).sendMessage(content, user.id);
+                                    _controller.clear();
+                                  }
+                                },
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RequestIntroCard extends StatelessWidget {
+  final String content;
+  const _RequestIntroCard({required this.content});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: context.surfaceVariant,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: context.primary.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Assistance request', style: context.bodySmall.copyWith(color: context.primary, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 8),
+          Text(content, style: context.bodyLarge.copyWith(color: context.textPrimary)),
         ],
       ),
     );

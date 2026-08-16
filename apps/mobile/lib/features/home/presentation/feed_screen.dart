@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:ui/ui.dart';
 
 import '../../chat/data/chat_repository.dart';
+import '../../requests/presentation/request_assist.dart';
 import '../../requests/providers/request_provider.dart';
 
 class FeedScreen extends ConsumerWidget {
@@ -10,49 +11,49 @@ class FeedScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Hardcoded location for MVP
-    // In a real app we'd use Geolocator to get current position
-    final nearbyAsync = ref.watch(nearbyRequestsProvider((lat: 40.7128, lng: -74.0060, radius: 10.0)));
+    final nearbyAsync = ref.watch(nearbyRequestsProvider);
+    final mySessions = ref.watch(mySessionsProvider).asData?.value;
+    final topInset = MediaQuery.paddingOf(context).top + kToolbarHeight + 16;
 
     return nearbyAsync.when(
+      skipLoadingOnReload: true,
+      skipLoadingOnRefresh: true,
       data: (requests) {
         if (requests.isEmpty) {
-          return const Center(child: Text('No requests nearby. Be the first!'));
+          return const Center(child: Text('No requests in this area.'));
         }
         return ListView.builder(
+          padding: EdgeInsets.fromLTRB(0, topInset, 0, 120),
           itemCount: requests.length,
           itemBuilder: (context, index) {
             final req = requests[index];
-            return Card(
-              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: ListTile(
-                title: Text(req.title),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(req.description),
-                    const SizedBox(height: 4),
-                    Text('${req.urgency.name} • ${req.status.name}', style: Theme.of(context).textTheme.bodySmall),
-                  ],
+            final mine = sessionForRequest(mySessions, req.id);
+            final busy = req.isBusy;
+
+            return Opacity(
+              opacity: busy ? 0.55 : 1,
+              child: Card(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                color: busy ? context.surfaceVariant : null,
+                child: ListTile(
+                  title: Text(req.title),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(req.description),
+                      const SizedBox(height: 4),
+                      Text(
+                        busy ? 'Busy · someone is helping' : '${req.urgency.name} • ${req.status.name}',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                  trailing: ElevatedButton(
+                    onPressed: () => openOrStartAssist(context: context, ref: ref, request: req),
+                    child: Text(mine != null ? 'Open chat' : busy ? 'Busy' : 'Assist'),
+                  ),
+                  onTap: () => openOrStartAssist(context: context, ref: ref, request: req),
                 ),
-                trailing: ElevatedButton(
-                  onPressed: () async {
-                    try {
-                      final session = await ref.read(chatRepositoryProvider).createSession(req.id);
-                      if (context.mounted) {
-                        await context.push('/session/${session.id}');
-                      }
-                    } catch (e) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to start session: $e')));
-                      }
-                    }
-                  },
-                  child: const Text('Assist'),
-                ),
-                onTap: () {
-                  // Navigate to details if needed
-                },
               ),
             );
           },

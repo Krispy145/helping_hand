@@ -6,6 +6,7 @@ exports.default = (0, config_1.defineConfig)({
     schema: "prisma/schema.prisma",
     migrations: {
         path: "prisma/migrations",
+        seed: "npx ts-node --compiler-options {\"module\":\"CommonJS\",\"moduleResolution\":\"node\"} prisma/seed.ts",
     },
     engine: "classic",
     datasource: {

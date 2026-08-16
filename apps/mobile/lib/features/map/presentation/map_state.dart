@@ -9,7 +9,7 @@ class MapState {
   final LatLng? userLocation;
   final Object? error;
 
-  const MapState({this.center = const LatLng(40.7128, -74.0060), this.zoom = 13.0, this.isSearching = false, this.requests = const [], this.userLocation, this.error});
+  const MapState({this.center = const LatLng(-33.9249, 18.4241), this.zoom = 13.0, this.isSearching = false, this.requests = const [], this.userLocation, this.error});
 
   MapState copyWith({LatLng? center, double? zoom, bool? isSearching, List<RequestDto>? requests, LatLng? userLocation, Object? error}) {
     return MapState(

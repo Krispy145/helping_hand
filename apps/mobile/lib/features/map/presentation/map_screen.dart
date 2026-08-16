@@ -1,13 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:map/map.dart';
 import 'package:models/models.dart';
 import 'package:ui/ui.dart';
 
 import '../../chat/data/chat_repository.dart';
+import '../../requests/data/request_repository.dart';
+import '../../requests/presentation/request_assist.dart';
 import '../../requests/providers/request_provider.dart';
-import 'map_controller.dart' as logic; // Alias to avoid conflict with flutter_map MapController
+import 'map_controller.dart' as logic;
 
 class MapScreen extends ConsumerStatefulWidget {
   const MapScreen({super.key});
@@ -16,85 +19,84 @@ class MapScreen extends ConsumerStatefulWidget {
   ConsumerState<MapScreen> createState() => _MapScreenState();
 }
 
-class _MapScreenState extends ConsumerState<MapScreen> with TickerProviderStateMixin {
+class _MapScreenState extends ConsumerState<MapScreen> {
+  static const _discoveryCenter = LatLng(-33.9249, 18.4241);
   final MapController _mapController = MapController();
+  Timer? _idleRefreshTimer;
+  String? _lastBoundsKey;
+
+  @override
+  void dispose() {
+    _idleRefreshTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(logic.mapControllerProvider);
-    // Also listen to user location one-time or via the controller logic?
-    // Using userLocationProvider directly here for initial position if state is empty
     final locationAsync = ref.watch(userLocationProvider);
+    final requestsAsync = ref.watch(nearbyRequestsProvider);
+    final mySessions = ref.watch(mySessionsProvider).asData?.value;
+    final location = locationAsync.asData?.value;
+
+    final requestMarkers = requestsAsync.maybeWhen(
+      skipLoadingOnReload: true,
+      skipLoadingOnRefresh: true,
+      data: (requests) {
+        return requests.where((req) => req.lat != null && req.lng != null).map((req) {
+          final mine = sessionForRequest(mySessions, req.id);
+          final busy = req.isBusy;
+          return Marker(
+            key: ValueKey('request-${req.id}-${req.status.name}'),
+            point: LatLng(req.lat!, req.lng!),
+            width: 40,
+            height: 40,
+            child: GestureDetector(
+              onTap: () => _showRequestDetails(context, ref, req, mine != null),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: busy ? const Color(0xFF9AA0A6) : context.primary,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: context.surface, width: 2),
+                  boxShadow: [BoxShadow(color: context.shadow.withValues(alpha: 0.2), blurRadius: 4, offset: const Offset(0, 2))],
+                ),
+                child: Icon(Icons.handshake, color: context.surface, size: 20),
+              ),
+            ),
+          );
+        }).toList();
+      },
+      orElse: () => <Marker>[],
+    );
+
+    final markers = [...requestMarkers];
+    if (location != null) {
+      markers.add(
+        Marker(
+          point: location,
+          width: 24,
+          height: 24,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: context.information,
+              shape: BoxShape.circle,
+              border: Border.all(color: context.surface, width: 2),
+              boxShadow: [BoxShadow(color: context.information.withValues(alpha: 0.4), blurRadius: 8, spreadRadius: 2)],
+            ),
+            child: Center(child: Icon(Icons.circle, size: 12, color: context.onInformation)),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       body: Stack(
         children: [
-          locationAsync.when(
-            data: (location) {
-              final center = location ?? const LatLng(40.7128, -74.0060);
-
-              // If we have requests in state, use them. Else, we could trigger initial load.
-              // For now, let's just use the provider directly for markers to keep it simple and reactive
-              // BUT we want to support "Searching" state from controler.
-
-              final requestsAsync = ref.watch(nearbyRequestsProvider((lat: center.latitude, lng: center.longitude, radius: 20.0)));
-
-              final markers = requestsAsync.maybeWhen(
-                data: (requests) => requests.where((req) => req.lat != null && req.lng != null).map((req) {
-                  return Marker(
-                    point: LatLng(req.lat!, req.lng!),
-                    width: 40,
-                    height: 40,
-                    child: GestureDetector(
-                      onTap: () => _showRequestDetails(context, ref, req),
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: context.primary,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: context.surface, width: 2),
-                          boxShadow: [BoxShadow(color: context.shadow.withValues(alpha: 0.2), blurRadius: 4, offset: const Offset(0, 2))],
-                        ),
-                        child: Icon(Icons.handshake, color: context.onPrimary, size: 20),
-                      ),
-                    ),
-                  );
-                }).toList(),
-                orElse: () => <Marker>[],
-              );
-
-              // Add User Marker
-              if (location != null) {
-                markers.add(
-                  Marker(
-                    point: location,
-                    width: 24,
-                    height: 24,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: context.information,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: context.surface, width: 2),
-                        boxShadow: [BoxShadow(color: context.information.withValues(alpha: 0.4), blurRadius: 8, spreadRadius: 2)],
-                      ),
-                      child: Center(child: Icon(Icons.circle, size: 12, color: context.onInformation)),
-                    ),
-                  ),
-                );
-              }
-
-              return MapBuilder(mapController: _mapController, initialCenter: center, markers: markers);
-            },
-            loading: () => const Center(child: BreathingLoader()),
-            error: (e, s) => Center(child: Text('Error: $e')),
-          ),
-
-          // Radar Pulse Overlay (when searching)
+          MapBuilder(mapController: _mapController, initialCenter: _discoveryCenter, markers: markers, onMapReady: _scheduleVisibleRefresh, onMapEvent: _onMapEvent),
           if (state.isSearching)
             Positioned.fill(
               child: MapRadar(color: context.primary, size: MediaQuery.of(context).size.width * 0.8),
             ),
-
-          // Controls
           Positioned(
             right: 16,
             top: MediaQuery.of(context).viewInsets.top + 164,
@@ -114,11 +116,8 @@ class _MapScreenState extends ConsumerState<MapScreen> with TickerProviderStateM
                 const SizedBox(height: 16),
                 MapLocationButton(
                   onPressed: () {
-                    final location = locationAsync.value;
                     if (location != null) {
                       _mapController.move(location, 15);
-                      // Trigger "Radar" or refresh
-                      ref.read(logic.mapControllerProvider.notifier).searchArea(location, 20);
                     }
                   },
                 ),
@@ -130,7 +129,57 @@ class _MapScreenState extends ConsumerState<MapScreen> with TickerProviderStateM
     );
   }
 
-  void _showRequestDetails(BuildContext context, WidgetRef ref, RequestDto req) {
+  void _onMapEvent(MapEvent event) {
+    final movementEnded = event is MapEventMoveEnd || event is MapEventFlingAnimationEnd || event is MapEventDoubleTapZoomEnd || event is MapEventNonRotatedSizeChange;
+    if (!movementEnded) return;
+    _scheduleVisibleRefresh();
+  }
+
+  void _scheduleVisibleRefresh() {
+    _idleRefreshTimer?.cancel();
+    _idleRefreshTimer = Timer(const Duration(milliseconds: 350), _refreshVisibleRequests);
+  }
+
+  Future<void> _refreshVisibleRequests() async {
+    NearbyBounds bounds;
+    try {
+      bounds = _boundsFromCamera(_mapController.camera.visibleBounds);
+    } catch (_) {
+      return;
+    }
+
+    if (!_isUsableBounds(bounds)) return;
+
+    final boundsKey = '${bounds.minLat.toStringAsFixed(4)},${bounds.minLng.toStringAsFixed(4)},${bounds.maxLat.toStringAsFixed(4)},${bounds.maxLng.toStringAsFixed(4)}';
+    if (boundsKey == _lastBoundsKey) return;
+    _lastBoundsKey = boundsKey;
+
+    ref.read(logic.mapControllerProvider.notifier).setSearching(true);
+    try {
+      await ref.read(nearbyRequestsProvider.notifier).refresh(bounds: bounds);
+    } finally {
+      if (mounted) {
+        await ref.read(logic.mapControllerProvider.notifier).setSearching(false);
+      }
+    }
+  }
+
+  NearbyBounds _boundsFromCamera(LatLngBounds visible) {
+    final latSpan = (visible.north - visible.south).abs();
+    final lngSpan = (visible.east - visible.west).abs();
+    final latPad = latSpan * 0.1;
+    final lngPad = lngSpan * 0.1;
+    return NearbyBounds(minLat: visible.south - latPad, minLng: visible.west - lngPad, maxLat: visible.north + latPad, maxLng: visible.east + lngPad);
+  }
+
+  bool _isUsableBounds(NearbyBounds bounds) {
+    final latSpan = (bounds.maxLat - bounds.minLat).abs();
+    final lngSpan = (bounds.maxLng - bounds.minLng).abs();
+    return latSpan > 0.0005 && lngSpan > 0.0005;
+  }
+
+  void _showRequestDetails(BuildContext context, WidgetRef ref, RequestDto req, bool isMine) {
+    final busy = req.isBusy;
     showModalBottomSheet<void>(
       context: context,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
@@ -143,24 +192,22 @@ class _MapScreenState extends ConsumerState<MapScreen> with TickerProviderStateM
             Text(req.title, style: context.h2),
             const SizedBox(height: 8),
             Text(req.description, style: context.bodyLarge),
+            if (busy) ...[const SizedBox(height: 8), Text(isMine ? 'This request is busy. You already have a chat.' : 'Busy — someone is already helping.', style: context.bodySmall)],
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () async {
                   Navigator.pop(ctx);
-                  try {
-                    final session = await ref.read(chatRepositoryProvider).createSession(req.id);
-                    if (context.mounted) {
-                      await context.push('/session/${session.id}');
-                    }
-                  } catch (e) {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed: $e')));
-                    }
-                  }
+                  await openOrStartAssist(context: context, ref: ref, request: req);
                 },
-                child: const Text('Offer Help'),
+                child: Text(
+                  isMine
+                      ? 'Open chat'
+                      : busy
+                      ? 'Busy'
+                      : 'Offer Help',
+                ),
               ),
             ),
           ],

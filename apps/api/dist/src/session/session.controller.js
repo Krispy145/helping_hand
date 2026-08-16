@@ -22,13 +22,29 @@ let SessionController = class SessionController {
         this.sessionService = sessionService;
     }
     async createSession(req, requestId) {
-        return this.sessionService.createSession(requestId, req.user.id);
+        if (!requestId)
+            throw new common_1.BadRequestException('requestId is required');
+        return this.sessionService.createSession(requestId, req.user.userId);
     }
     async getMySessions(req) {
-        return this.sessionService.getUserSessions(req.user.id);
+        return this.sessionService.getUserSessions(req.user.userId);
+    }
+    async checkAvailability(req, requestId) {
+        if (!requestId)
+            throw new common_1.BadRequestException('requestId is required');
+        return this.sessionService.checkOfferAvailability(requestId, req.user.userId);
+    }
+    async cancelAssist(req, sessionId) {
+        return this.sessionService.cancelAssist(sessionId, req.user.userId);
+    }
+    async completeAssist(req, sessionId) {
+        return this.sessionService.completeAssist(sessionId, req.user.userId);
     }
     async getSessionMessages(req, sessionId) {
-        return this.sessionService.getMessages(sessionId, req.user.id);
+        return this.sessionService.getMessages(sessionId, req.user.userId);
+    }
+    async getSession(req, sessionId) {
+        return this.sessionService.getSession(sessionId, req.user.userId);
     }
 };
 exports.SessionController = SessionController;
@@ -48,6 +64,30 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], SessionController.prototype, "getMySessions", null);
 __decorate([
+    (0, common_1.Get)('availability'),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Query)('requestId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], SessionController.prototype, "checkAvailability", null);
+__decorate([
+    (0, common_1.Post)(':id/cancel'),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], SessionController.prototype, "cancelAssist", null);
+__decorate([
+    (0, common_1.Post)(':id/complete'),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], SessionController.prototype, "completeAssist", null);
+__decorate([
     (0, common_1.Get)(':id/messages'),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Param)('id')),
@@ -55,6 +95,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], SessionController.prototype, "getSessionMessages", null);
+__decorate([
+    (0, common_1.Get)(':id'),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], SessionController.prototype, "getSession", null);
 exports.SessionController = SessionController = __decorate([
     (0, common_1.Controller)('sessions'),
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),

@@ -26,14 +26,21 @@ let RequestsController = class RequestsController {
     async create(req, createRequestDto) {
         return this.requestsService.create(req.user.userId, createRequestDto);
     }
-    async findNearby(lat, lng, radius) {
+    async findNearby(minLat, minLng, maxLat, maxLng, lat, lng, radius) {
+        const south = parseFloat(minLat);
+        const west = parseFloat(minLng);
+        const north = parseFloat(maxLat);
+        const east = parseFloat(maxLng);
+        if ([south, west, north, east].every((value) => Number.isFinite(value))) {
+            return this.requestsService.findAllInBounds(south, west, north, east);
+        }
         const latNum = parseFloat(lat);
         const lngNum = parseFloat(lng);
         const radiusNum = parseFloat(radius) || 10;
-        if (isNaN(latNum) || isNaN(lngNum)) {
-            throw new Error('Invalid coordinates');
+        if (Number.isFinite(latNum) && Number.isFinite(lngNum)) {
+            return this.requestsService.findAllNearby(latNum, lngNum, radiusNum);
         }
-        return this.requestsService.findAllNearby(latNum, lngNum, radiusNum);
+        throw new common_1.BadRequestException('Provide a bounding box or lat/lng');
     }
     findAll() {
         return this.requestsService.findAll();
@@ -56,13 +63,17 @@ __decorate([
     (0, common_1.Get)('nearby'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
-    (0, swagger_1.ApiOperation)({ summary: 'Find nearby requests' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Find nearby requests in a map bounding box' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'List of nearby requests' }),
-    __param(0, (0, common_1.Query)('lat')),
-    __param(1, (0, common_1.Query)('lng')),
-    __param(2, (0, common_1.Query)('radius')),
+    __param(0, (0, common_1.Query)('minLat')),
+    __param(1, (0, common_1.Query)('minLng')),
+    __param(2, (0, common_1.Query)('maxLat')),
+    __param(3, (0, common_1.Query)('maxLng')),
+    __param(4, (0, common_1.Query)('lat')),
+    __param(5, (0, common_1.Query)('lng')),
+    __param(6, (0, common_1.Query)('radius')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], RequestsController.prototype, "findNearby", null);
 __decorate([

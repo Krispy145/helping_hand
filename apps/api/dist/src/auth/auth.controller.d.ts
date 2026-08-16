@@ -10,17 +10,27 @@ export declare class AuthController {
             id: string;
             email: string;
             name: string | null | undefined;
-            role: import("../domain/entities/user.entity").UserRole;
+            role: string;
             created_at: Date;
             updated_at: Date;
         };
     }>;
-    register(registerDto: RegisterRequestDto): Promise<import("../domain/entities/user.entity").User>;
+    register(registerDto: RegisterRequestDto): Promise<{
+        access_token: string;
+        user: {
+            id: string;
+            email: string;
+            name: string | null | undefined;
+            role: string;
+            created_at: Date;
+            updated_at: Date;
+        };
+    }>;
     getProfile(req: any): Promise<{
         id: string;
         email: string;
         name: string | null | undefined;
-        role: import("../domain/entities/user.entity").UserRole;
+        role: string;
         created_at: Date;
         updated_at: Date;
     }>;

@@ -3,7 +3,8 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { RequestCreatedEvent } from './events/request-created.event';
 import { PrismaService } from '../infrastructure/persistence/prisma/prisma.service';
 import { CreateRequestDto } from './dto/create-request.dto';
-import { Request, RequestStatus } from '@prisma/client';
+import { RequestStatus } from '@prisma/client';
+import { toPublicRequest } from '../common/public-serializers';
 
 @Injectable()
 export class RequestsService {
@@ -12,7 +13,7 @@ export class RequestsService {
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  async create(userId: string, dto: CreateRequestDto): Promise<Request> {
+  async create(userId: string, dto: CreateRequestDto) {
     const request = await this.prisma.request.create({
       data: {
         userId,
@@ -22,55 +23,80 @@ export class RequestsService {
         urgency: dto.urgency,
         lat: dto.lat,
         lng: dto.lng,
-        status: RequestStatus.PENDING_VETTING, // Default status
-      },
-      include: {
-        user: true,
+        status: RequestStatus.PENDING_VETTING,
       },
     });
 
-    // Emit event for asynchronous vetting
     this.eventEmitter.emit(
       'request.created',
       new RequestCreatedEvent(request.id, request.title, request.description),
     );
 
-    return request;
+    return toPublicRequest(request);
   }
 
-  async findAll(): Promise<Request[]> {
-    return this.prisma.request.findMany({
-      include: { user: true },
+  async findAll() {
+    const requests = await this.prisma.request.findMany({
       orderBy: { createdAt: 'desc' },
     });
+    return requests.map((request) => toPublicRequest(request));
   }
 
-  async findAllNearby(
-    lat: number,
-    lng: number,
-    radiusInKm: number,
-  ): Promise<Request[]> {
-    // Raw SQL for Haversine formula
-    // Note: This assumes latitude/longitude columns are named 'lat' and 'lng' in the 'Request' table.
-    // Prisma models map to database tables, usually pascal case model -> pascal case or lowercase table depending on config.
-    // Default prisma naming: Model 'Request' -> Table 'Request' (or 'requests' if map set?)
-    // Checking schema.prisma... it didn't specify @@map, so it's 'Request'.
-    // However, raw queries return raw objects, may need casting.
-
-    const result = await this.prisma.$queryRaw<Request[]>`
-      SELECT *, 
-      ( 6371 * acos( cos( radians(${lat}) ) * cos( radians( lat ) ) * cos( radians( lng ) - radians(${lng}) ) + sin( radians(${lat}) ) * sin( radians( lat ) ) ) ) AS distance 
+  async findAllNearby(lat: number, lng: number, radiusInKm: number) {
+    const nearby = await this.prisma.$queryRaw<Array<{ id: string }>>`
+      SELECT id
       FROM "Request"
-      WHERE status = 'APPROVED'
-      AND ( 6371 * acos( cos( radians(${lat}) ) * cos( radians( lat ) ) * cos( radians( lng ) - radians(${lng}) ) + sin( radians(${lat}) ) * sin( radians( lat ) ) ) ) < ${radiusInKm}
-      ORDER BY distance ASC
+      WHERE status IN ('APPROVED', 'IN_PROGRESS')
+        AND lat IS NOT NULL
+        AND lng IS NOT NULL
+        AND (
+          6371 * acos(
+            cos(radians(${lat})) * cos(radians(lat)) * cos(radians(lng) - radians(${lng}))
+            + sin(radians(${lat})) * sin(radians(lat))
+          )
+        ) < ${radiusInKm}
+      ORDER BY (
+        6371 * acos(
+          cos(radians(${lat})) * cos(radians(lat)) * cos(radians(lng) - radians(${lng}))
+          + sin(radians(${lat})) * sin(radians(lat))
+        )
+      ) ASC
+      LIMIT 200
     `;
 
-    // Manually fetch relations if needed, or just return the raw data.
-    // Raw query doesn't include relations by default.
-    // For MVP feed, we might want user info.
-    // We can fetch user in a separate query or join.
-    // Let's keep it simple: just list requests first.
-    return result;
+    return this.hydratePublicRequests(nearby.map((row) => row.id));
+  }
+
+  async findAllInBounds(minLat: number, minLng: number, maxLat: number, maxLng: number) {
+    const south = Math.min(minLat, maxLat);
+    const north = Math.max(minLat, maxLat);
+    const west = Math.min(minLng, maxLng);
+    const east = Math.max(minLng, maxLng);
+
+    const requests = await this.prisma.request.findMany({
+      where: {
+        status: { in: [RequestStatus.APPROVED, RequestStatus.IN_PROGRESS] },
+        lat: { gte: south, lte: north },
+        lng: { gte: west, lte: east },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 200,
+    });
+
+    return requests.map((request) => toPublicRequest(request));
+  }
+
+  private async hydratePublicRequests(ids: string[]) {
+    if (ids.length === 0) return [];
+
+    const requests = await this.prisma.request.findMany({
+      where: { id: { in: ids } },
+    });
+    const byId = new Map(requests.map((request) => [request.id, request]));
+
+    return ids
+      .map((id) => byId.get(id))
+      .filter((request): request is NonNullable<typeof request> => request != null)
+      .map((request) => toPublicRequest(request));
   }
 }

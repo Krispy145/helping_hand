@@ -4,7 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:ui/ui.dart';
 
 import '../../../router.dart';
-import '../../map/presentation/map_controller.dart' as map_logic; // Alias to avoid conflict
+import '../../chat/data/chat_repository.dart';
+import '../../chat/presentation/chats_screen.dart';
 import '../../map/presentation/map_screen.dart';
 import '../../requests/providers/request_provider.dart';
 import 'feed_screen.dart';
@@ -27,6 +28,7 @@ class HomeScreen extends ConsumerWidget {
           segments: const [
             ButtonSegment(value: 0, label: Text('Map'), icon: Icon(Icons.map)),
             ButtonSegment(value: 1, label: Text('Feed'), icon: Icon(Icons.list)),
+            ButtonSegment(value: 2, label: Text('Chats'), icon: Icon(Icons.chat_bubble_outline)),
           ],
           selected: {tabIndex},
           onSelectionChanged: (newSelection) {
@@ -62,7 +64,7 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: IndexedStack(index: tabIndex, children: const [MapScreen(), FeedScreen()]),
+      body: IndexedStack(index: tabIndex, children: const [MapScreen(), FeedScreen(), ChatsScreen()]),
       floatingActionButton: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -71,22 +73,10 @@ class HomeScreen extends ConsumerWidget {
             backgroundColor: context.surface,
             foregroundColor: context.primary,
             onPressed: () async {
-              if (tabIndex == 0) {
-                // Map Refresh
-                // We need the center... MapController has it in state, or we use defaults.
-                // Ideally MapController should know its center.
-                final mapState = ref.read(map_logic.mapControllerProvider);
-                await ref.read(map_logic.mapControllerProvider.notifier).searchArea(mapState.center, 20);
+              if (tabIndex == 2) {
+                ref.invalidate(mySessionsProvider);
               } else {
-                // Feed Refresh
-                // Invalidate provider to show loading state
-                // We also want a delay to seeing the loading spinner.
-                // We can simply invalidate, and if the provider is fast, it flickers.
-                // To force a delay, we can modify the provider or do a trick here.
-                // Let's modify the provider slightly to have a min delay?
-                // OR just invalidate. The user asked for simulated delay.
-                // I will modify the provider to include a delay.
-                ref.invalidate(nearbyRequestsProvider);
+                await ref.read(nearbyRequestsProvider.notifier).refresh();
               }
             },
             child: const Icon(Icons.refresh),

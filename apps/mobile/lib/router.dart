@@ -7,6 +7,7 @@ import 'features/auth/presentation/login_screen.dart';
 import 'features/auth/presentation/register_screen.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/chat/presentation/chat_screen.dart';
+import 'features/chat/presentation/chats_screen.dart';
 import 'features/home/presentation/home_screen.dart';
 import 'features/onboarding/application/onboarding_state_provider.dart';
 import 'features/onboarding/presentation/onboarding_screen.dart';
@@ -21,6 +22,7 @@ class AppRoutes {
   static const session = '/session/:id';
   static const onboarding = '/onboarding';
   static const settings = '/settings';
+  static const chats = '/chats';
 }
 
 class AppRouter {
@@ -85,6 +87,7 @@ class AppRouter {
           builder: (context, state) => ChatScreen(sessionId: state.pathParameters['id']!),
         ),
         GoRoute(path: AppRoutes.settings, builder: (context, state) => const SettingsScreen()),
+        GoRoute(path: AppRoutes.chats, builder: (context, state) => const ChatsScreen()),
       ],
     );
   });

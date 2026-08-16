@@ -14,34 +14,33 @@ class ChatsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final chatsAsync = ref.watch(mySessionsProvider);
     final userId = ref.watch(authProvider).value?.id;
-    final topInset = MediaQuery.paddingOf(context).top + kToolbarHeight + 16;
 
-    return chatsAsync.when(
-      data: (chats) {
-        if (chats.isEmpty) {
-          return Padding(
-            padding: EdgeInsets.fromLTRB(24, topInset, 24, 24),
-            child: Center(
+    return Scaffold(
+      appBar: AppBar(title: const Text('Chats'), centerTitle: true),
+      body: chatsAsync.when(
+        data: (chats) {
+          if (chats.isEmpty) {
+            return Center(
               child: Text(
                 'No current chats.\nOffer help on a request to start one.',
                 textAlign: TextAlign.center,
                 style: context.bodyLarge.copyWith(color: context.textSecondary),
               ),
-            ),
-          );
-        }
+            );
+          }
 
-        return ListView.builder(
-          padding: EdgeInsets.fromLTRB(16, topInset, 16, 120),
-          itemCount: chats.length,
-          itemBuilder: (context, index) {
-            final chat = chats[index];
-            return _ChatTile(chat: chat, currentUserId: userId);
-          },
-        );
-      },
-      loading: () => const Center(child: BreathingLoader()),
-      error: (error, _) => Center(child: Text('Could not load chats: $error')),
+          return ListView.builder(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+            itemCount: chats.length,
+            itemBuilder: (context, index) {
+              final chat = chats[index];
+              return _ChatTile(chat: chat, currentUserId: userId);
+            },
+          );
+        },
+        loading: () => const Center(child: BreathingLoader()),
+        error: (error, _) => Center(child: Text('Could not load chats: $error')),
+      ),
     );
   }
 }
@@ -62,7 +61,7 @@ class _ChatTile extends StatelessWidget {
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: context.surfaceVariant,
-          child: Icon(Icons.chat_bubble_outline, color: context.textPrimary),
+          child: Icon(Icons.chat_bubble, color: context.textPrimary),
         ),
         title: Text(otherName, style: context.h3),
         subtitle: Text(

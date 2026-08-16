@@ -19,6 +19,7 @@ class _AppState extends ConsumerState<App> {
   @override
   void initState() {
     super.initState();
+    AppLogger.initialize();
     _lifecycleObserver = AppLifecycleObserver();
     WidgetsBinding.instance.addObserver(_lifecycleObserver);
   }
@@ -34,13 +35,21 @@ class _AppState extends ConsumerState<App> {
     final router = ref.watch(AppRouter.instance.routerProvider);
     final appTheme = ref.watch(appThemeProvider);
 
-    return MaterialApp.router(
-      title: F.title,
-      theme: AppTheme.build(style: appTheme.style, brightness: Brightness.light),
-      darkTheme: AppTheme.build(style: appTheme.style, brightness: Brightness.dark),
-      themeMode: appTheme.mode,
-      routerConfig: router,
-      builder: (context, child) => _flavorBanner(child: child ?? const SizedBox.shrink()),
+    return TranslationProvider(
+      child: Builder(
+        builder: (context) {
+          return MaterialApp.router(
+            title: F.title,
+            locale: TranslationProvider.of(context).flutterLocale,
+            supportedLocales: AppLocaleUtils.supportedLocales,
+            theme: AppTheme.build(style: appTheme.style, brightness: Brightness.light),
+            darkTheme: AppTheme.build(style: appTheme.style, brightness: Brightness.dark),
+            themeMode: appTheme.mode,
+            routerConfig: router,
+            builder: (context, child) => _flavorBanner(child: child ?? const SizedBox.shrink()),
+          );
+        },
+      ),
     );
   }
 

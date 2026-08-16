@@ -8,16 +8,24 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile/app.dart';
+import 'package:mobile/core/shared_preferences_provider.dart';
 import 'package:mobile/flavors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   setUp(() {
     F.appFlavor = Flavor.dev;
+    SharedPreferences.setMockInitialValues({});
   });
 
   testWidgets('Smoke test: App launches LoginScreen', (tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const ProviderScope(child: App()));
+    final prefs = await SharedPreferences.getInstance();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [sharedPreferencesProvider.overrideWith((ref) => prefs)],
+        child: const App(),
+      ),
+    );
     await tester.pump(const Duration(seconds: 2));
 
     // Verify that Login Screen is shown.

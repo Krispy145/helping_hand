@@ -5,6 +5,12 @@ analyzer:
     - "build/**"
     - "**/*.g.dart"
     - "**/*.gr.dart"
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
   errors:
     included_file_warning: ignore
     invalid_annotation_target: ignore

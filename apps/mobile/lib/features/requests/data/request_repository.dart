@@ -23,10 +23,10 @@ class NearbyBounds {
   });
 
   static const capeTownViewport = NearbyBounds(
-    minLat: -33.96,
-    minLng: 18.38,
-    maxLat: -33.89,
-    maxLng: 18.47,
+    minLat: -34.12,
+    minLng: 18.25,
+    maxLat: -33.72,
+    maxLng: 18.72,
   );
 
   Map<String, double> toQuery() => {

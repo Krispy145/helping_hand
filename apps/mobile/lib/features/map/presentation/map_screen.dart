@@ -20,10 +20,13 @@ class MapScreen extends ConsumerStatefulWidget {
 }
 
 class _MapScreenState extends ConsumerState<MapScreen> {
-  static const _discoveryCenter = LatLng(-33.9249, 18.4241);
+  static const _capeTownCenter = LatLng(-33.9249, 18.4241);
+  static const _userZoom = 14.0;
+  static const _capeTownOverviewZoom = 11.0;
   final MapController _mapController = MapController();
   Timer? _idleRefreshTimer;
   String? _lastBoundsKey;
+  bool _didCenterOnUser = false;
 
   @override
   void dispose() {
@@ -38,6 +41,20 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final requestsAsync = ref.watch(nearbyRequestsProvider);
     final mySessions = ref.watch(mySessionsProvider).asData?.value;
     final location = locationAsync.asData?.value;
+
+    if (locationAsync.isLoading && location == null) {
+      return const Scaffold(body: Center(child: BreathingLoader()));
+    }
+
+    if (location != null) {
+      _didCenterOnUser = true;
+    }
+
+    ref.listen(userLocationProvider, (previous, next) {
+      final userLocation = next.asData?.value;
+      if (userLocation == null || _didCenterOnUser) return;
+      _centerOnUser(userLocation);
+    });
 
     final requestMarkers = requestsAsync.maybeWhen(
       skipLoadingOnReload: true,
@@ -92,7 +109,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          MapBuilder(mapController: _mapController, initialCenter: _discoveryCenter, markers: markers, onMapReady: _scheduleVisibleRefresh, onMapEvent: _onMapEvent),
+          MapBuilder(
+            mapController: _mapController,
+            initialCenter: location ?? _capeTownCenter,
+            initialZoom: location != null ? _userZoom : _capeTownOverviewZoom,
+            markers: markers,
+            onMapReady: _scheduleVisibleRefresh,
+            onMapEvent: _onMapEvent,
+          ),
           if (state.isSearching)
             Positioned.fill(
               child: MapRadar(color: context.primary, size: MediaQuery.of(context).size.width * 0.8),
@@ -117,7 +141,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 MapLocationButton(
                   onPressed: () {
                     if (location != null) {
-                      _mapController.move(location, 15);
+                      _mapController.move(location, _userZoom);
+                    } else {
+                      _mapController.move(_capeTownCenter, _capeTownOverviewZoom);
                     }
                   },
                 ),
@@ -127,6 +153,18 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         ],
       ),
     );
+  }
+
+  void _centerOnUser(LatLng userLocation) {
+    _didCenterOnUser = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      try {
+        _mapController.move(userLocation, _userZoom);
+      } on Exception {
+        // Map is not attached yet; initialCenter already used the user location when available.
+      }
+    });
   }
 
   void _onMapEvent(MapEvent event) {

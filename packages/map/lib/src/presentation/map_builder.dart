@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 
 class MapBuilder extends StatelessWidget {
   final LatLng? initialCenter;
+  final double initialZoom;
   final List<Marker> markers;
   final MapController? mapController;
   final VoidCallback? onMapReady;
@@ -12,6 +13,7 @@ class MapBuilder extends StatelessWidget {
   const MapBuilder({
     super.key,
     this.initialCenter,
+    this.initialZoom = 11.0,
     this.markers = const [],
     this.mapController,
     this.onMapReady,
@@ -26,7 +28,7 @@ class MapBuilder extends StatelessWidget {
       mapController: mapController,
       options: MapOptions(
         initialCenter: center,
-        initialZoom: 13.0,
+        initialZoom: initialZoom,
         onMapReady: onMapReady,
         onMapEvent: onMapEvent,
       ),

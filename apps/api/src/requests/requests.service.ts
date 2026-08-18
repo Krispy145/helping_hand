@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { RequestCreatedEvent } from './events/request-created.event';
 import { PrismaService } from '../infrastructure/persistence/prisma/prisma.service';
 import { CreateRequestDto } from './dto/create-request.dto';
 import { RequestStatus } from '@prisma/client';
 import { toPublicRequest } from '../common/public-serializers';
+import { approximateLocation } from '../common/geo-hash';
 
 @Injectable()
 export class RequestsService {
@@ -14,6 +15,18 @@ export class RequestsService {
   ) {}
 
   async create(userId: string, dto: CreateRequestDto) {
+    if (
+      dto.lat == null ||
+      dto.lng == null ||
+      !Number.isFinite(dto.lat) ||
+      !Number.isFinite(dto.lng)
+    ) {
+      throw new BadRequestException(
+        'A location is required to create a request',
+      );
+    }
+
+    const approx = approximateLocation(dto.lat, dto.lng);
     const request = await this.prisma.request.create({
       data: {
         userId,
@@ -23,6 +36,9 @@ export class RequestsService {
         urgency: dto.urgency,
         lat: dto.lat,
         lng: dto.lng,
+        geoHashApprox: approx.geoHashApprox,
+        approxLat: approx.approxLat,
+        approxLng: approx.approxLng,
         status: RequestStatus.PENDING_VETTING,
       },
     });
@@ -47,18 +63,18 @@ export class RequestsService {
       SELECT id
       FROM "Request"
       WHERE status IN ('APPROVED', 'IN_PROGRESS')
-        AND lat IS NOT NULL
-        AND lng IS NOT NULL
+        AND "approxLat" IS NOT NULL
+        AND "approxLng" IS NOT NULL
         AND (
           6371 * acos(
-            cos(radians(${lat})) * cos(radians(lat)) * cos(radians(lng) - radians(${lng}))
-            + sin(radians(${lat})) * sin(radians(lat))
+            cos(radians(${lat})) * cos(radians("approxLat")) * cos(radians("approxLng") - radians(${lng}))
+            + sin(radians(${lat})) * sin(radians("approxLat"))
           )
         ) < ${radiusInKm}
       ORDER BY (
         6371 * acos(
-          cos(radians(${lat})) * cos(radians(lat)) * cos(radians(lng) - radians(${lng}))
-          + sin(radians(${lat})) * sin(radians(lat))
+          cos(radians(${lat})) * cos(radians("approxLat")) * cos(radians("approxLng") - radians(${lng}))
+          + sin(radians(${lat})) * sin(radians("approxLat"))
         )
       ) ASC
       LIMIT 200
@@ -67,7 +83,12 @@ export class RequestsService {
     return this.hydratePublicRequests(nearby.map((row) => row.id));
   }
 
-  async findAllInBounds(minLat: number, minLng: number, maxLat: number, maxLng: number) {
+  async findAllInBounds(
+    minLat: number,
+    minLng: number,
+    maxLat: number,
+    maxLng: number,
+  ) {
     const south = Math.min(minLat, maxLat);
     const north = Math.max(minLat, maxLat);
     const west = Math.min(minLng, maxLng);
@@ -76,8 +97,8 @@ export class RequestsService {
     const requests = await this.prisma.request.findMany({
       where: {
         status: { in: [RequestStatus.APPROVED, RequestStatus.IN_PROGRESS] },
-        lat: { gte: south, lte: north },
-        lng: { gte: west, lte: east },
+        approxLat: { gte: south, lte: north },
+        approxLng: { gte: west, lte: east },
       },
       orderBy: { createdAt: 'desc' },
       take: 200,
@@ -96,7 +117,9 @@ export class RequestsService {
 
     return ids
       .map((id) => byId.get(id))
-      .filter((request): request is NonNullable<typeof request> => request != null)
+      .filter(
+        (request): request is NonNullable<typeof request> => request != null,
+      )
       .map((request) => toPublicRequest(request));
   }
 }

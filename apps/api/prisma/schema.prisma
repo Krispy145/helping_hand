@@ -96,8 +96,11 @@ model Request {
   category    String?
   status      RequestStatus  @default(PENDING_VETTING)
   urgency     RequestUrgency @default(MEDIUM)
-  lat         Float?
-  lng         Float?
+  lat           Float?
+  lng           Float?
+  geoHashApprox String?
+  approxLat     Float?
+  approxLng     Float?
   userId      String
   user        User           @relation(fields: [userId], references: [id])
   createdAt   DateTime       @default(now())
@@ -106,6 +109,9 @@ model Request {
   session     Session?
   reports     Report[]
   incidents   SafetyIncident[]
+
+  @@index([approxLat, approxLng])
+  @@index([geoHashApprox])
 }
 
 enum ReportType {

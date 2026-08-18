@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { PrismaClient, RequestStatus, RequestUrgency, Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { approximateLocation } from '../src/common/geo-hash';
 
 const prisma = new PrismaClient();
 
@@ -8,7 +9,6 @@ const SEED_EMAIL_DOMAIN = 'helpinghand.seed';
 const SEED_PASSWORD = 'password123';
 const USER_COUNT = 200;
 const REQUEST_COUNT = 500;
-const GEO_BIN_KM = 1.2;
 
 type City = {
   name: string;
@@ -68,16 +68,7 @@ function offsetAround(city: City): { lat: number; lng: number } {
   const latOffset = (distanceKm * Math.cos(bearing)) / 111;
   const lngOffset =
     (distanceKm * Math.sin(bearing)) / (111 * Math.cos((city.lat * Math.PI) / 180));
-  return snapToApproxBin(city.lat + latOffset, city.lng + lngOffset);
-}
-
-function snapToApproxBin(lat: number, lng: number): { lat: number; lng: number } {
-  const latBin = GEO_BIN_KM / 111;
-  const lngBin = GEO_BIN_KM / (111 * Math.cos((lat * Math.PI) / 180));
-  return {
-    lat: Math.round(lat / latBin) * latBin,
-    lng: Math.round(lng / lngBin) * lngBin,
-  };
+  return { lat: city.lat + latOffset, lng: city.lng + lngOffset };
 }
 
 function pickStatus(): RequestStatus {
@@ -145,6 +136,7 @@ async function main() {
       const city = weightedCity();
       cityCounts.set(city.name, (cityCounts.get(city.name) ?? 0) + 1);
       const location = offsetAround(city);
+      const approx = approximateLocation(location.lat, location.lng);
       const template = pick(REQUEST_TEMPLATES);
       return {
         title: template.title,
@@ -154,6 +146,9 @@ async function main() {
         urgency: pickUrgency(),
         lat: location.lat,
         lng: location.lng,
+        geoHashApprox: approx.geoHashApprox,
+        approxLat: approx.approxLat,
+        approxLng: approx.approxLng,
         userId: pick(users).id,
       };
     }),
@@ -167,7 +162,7 @@ async function main() {
   });
 
   console.log(`Created ${USER_COUNT} users with display names only (login: ${SEED_PASSWORD})`);
-  console.log(`Created ${REQUEST_COUNT} requests (${approved} approved), snapped to ~${GEO_BIN_KM}km bins`);
+  console.log(`Created ${REQUEST_COUNT} requests (${approved} approved), snapped to geohash-6 cells`);
   for (const [city, count] of cityCounts) {
     console.log(`  ${city}: ${count} requests`);
   }

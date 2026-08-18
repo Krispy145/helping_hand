@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../infrastructure/persistence/prisma/prisma.service';
-import { RequestStatus } from '@prisma/client';
+import { RequestStatus, SafetyIncidentSource } from '@prisma/client';
 
 @Injectable()
 export class VettingService {
@@ -23,23 +23,36 @@ export class VettingService {
   async vetRequest(requestId: string, textToVet: string): Promise<void> {
     this.logger.log(`Vetting request ${requestId}`);
 
-    // Normalize text (lowercase)
     const normalizedText = textToVet.toLowerCase();
-
-    // Check for restricted keywords
     const hasRestrictedContent = this.restrictedKeywords.some((keyword) =>
       normalizedText.includes(keyword),
     );
-
     const newStatus = hasRestrictedContent
       ? RequestStatus.REJECTED
       : RequestStatus.APPROVED;
 
-    // Update Request Status
     await this.prisma.request.update({
       where: { id: requestId },
       data: { status: newStatus },
     });
+
+    if (hasRestrictedContent) {
+      const request = await this.prisma.request.findUnique({
+        where: { id: requestId },
+        select: { userId: true },
+      });
+      if (request) {
+        await this.prisma.safetyIncident.create({
+          data: {
+            userId: request.userId,
+            source: SafetyIncidentSource.REQUEST_VETTING,
+            reasonCode: 'RESTRICTED_CONTENT',
+            detailsRedacted: 'Keyword filter matched restricted content.',
+            requestId,
+          },
+        });
+      }
+    }
 
     this.logger.log(
       `Request ${requestId} vetted. Status: ${newStatus} ${hasRestrictedContent ? '(Restricted content found)' : ''}`,

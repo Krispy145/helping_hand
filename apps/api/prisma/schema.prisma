@@ -25,15 +25,19 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  requests      Request[]
+  requests       Request[]
   helperSessions Session[] @relation("HelperSessions")
-  messages      Message[]
+  messages       Message[]
+  reportsFiled   Report[]  @relation("ReportsFiled")
+  reportsReceived Report[] @relation("ReportsReceived")
+  safetyIncidents SafetyIncident[]
 }
 
 enum SessionStatus {
   ACTIVE
   COMPLETED
   CANCELLED
+  DISPUTED
 }
 
 model Session {
@@ -48,7 +52,8 @@ model Session {
   status    SessionStatus @default(ACTIVE)
   
   messages  Message[]
-  
+  reports   Report[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -99,4 +104,75 @@ model Request {
   updatedAt   DateTime       @updatedAt
 
   session     Session?
+  reports     Report[]
+  incidents   SafetyIncident[]
+}
+
+enum ReportType {
+  HELPER_MISCONDUCT
+  HELPEE_MISUSE
+  SCAM
+  THEFT
+  UNSAFE_SITUATION
+}
+
+enum ReportSeverity {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum ReportStatus {
+  NEW
+  TRIAGED
+  ACTIONED
+  REJECTED
+}
+
+enum SafetyIncidentSource {
+  REQUEST_VETTING
+  RATE_LIMIT
+  REPORT_PATTERN
+}
+
+model Report {
+  id            String         @id @default(uuid())
+  reporterId    String
+  reporter      User           @relation("ReportsFiled", fields: [reporterId], references: [id])
+  targetUserId  String?
+  targetUser    User?          @relation("ReportsReceived", fields: [targetUserId], references: [id])
+  sessionId     String?
+  session       Session?       @relation(fields: [sessionId], references: [id])
+  requestId     String?
+  request       Request?       @relation(fields: [requestId], references: [id])
+  type          ReportType
+  severity      ReportSeverity @default(MEDIUM)
+  description   String
+  evidenceUrls  String[]       @default([])
+  status        ReportStatus   @default(NEW)
+  sessionEnded  Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  incidents     SafetyIncident[]
+
+  @@index([reporterId, createdAt])
+  @@index([targetUserId])
+  @@index([status])
+}
+
+model SafetyIncident {
+  id              String                @id @default(uuid())
+  userId          String?
+  user            User?                 @relation(fields: [userId], references: [id])
+  source          SafetyIncidentSource
+  reasonCode      String
+  detailsRedacted String?
+  reportId        String?
+  report          Report?               @relation(fields: [reportId], references: [id])
+  requestId       String?
+  request         Request?              @relation(fields: [requestId], references: [id])
+  createdAt       DateTime              @default(now())
+
+  @@index([userId, createdAt])
+  @@index([source])
 }

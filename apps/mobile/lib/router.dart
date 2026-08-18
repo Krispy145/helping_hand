@@ -11,6 +11,8 @@ import 'features/chat/presentation/chats_screen.dart';
 import 'features/home/presentation/home_screen.dart';
 import 'features/onboarding/application/onboarding_state_provider.dart';
 import 'features/onboarding/presentation/onboarding_screen.dart';
+import 'features/reports/presentation/report_entry.dart';
+import 'features/reports/presentation/report_screen.dart';
 import 'features/requests/presentation/create_request_screen.dart';
 import 'features/settings/presentation/settings_screen.dart';
 
@@ -23,6 +25,7 @@ class AppRoutes {
   static const onboarding = '/onboarding';
   static const settings = '/settings';
   static const chats = '/chats';
+  static const report = '/report';
 }
 
 class AppRouter {
@@ -88,6 +91,14 @@ class AppRouter {
         ),
         GoRoute(path: AppRoutes.settings, builder: (context, state) => const SettingsScreen()),
         GoRoute(path: AppRoutes.chats, builder: (context, state) => const ChatsScreen()),
+        GoRoute(
+          path: AppRoutes.report,
+          builder: (context, state) {
+            final extra = state.extra;
+            final entry = extra is ReportEntry ? extra : const ReportEntry();
+            return ReportScreen(entry: entry);
+          },
+        ),
       ],
     );
   });

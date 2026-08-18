@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { RequestsModule } from './requests/requests.module';
 import { VettingModule } from './vetting/vetting.module';
 import { SessionModule } from './session/session.module';
+import { ReportsModule } from './reports/reports.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
@@ -18,6 +19,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     RequestsModule,
     VettingModule,
     SessionModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

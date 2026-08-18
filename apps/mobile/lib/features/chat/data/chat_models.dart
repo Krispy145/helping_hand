@@ -91,6 +91,10 @@ class ChatSessionDetails {
     return other.name?.trim().isNotEmpty == true ? other.name! : 'Helper';
   }
 
+  String otherPartyId(String? currentUserId) {
+    return currentUserId == helperId ? requester.id : helperId;
+  }
+
   bool get isActive => status == 'ACTIVE';
 }
 

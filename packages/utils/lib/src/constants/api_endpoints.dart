@@ -11,5 +11,7 @@ class ApiEndpoints {
   static String sessionsMessages(String id) => '/sessions/$id/messages';
   static String sessionCancel(String id) => '/sessions/$id/cancel';
   static String sessionComplete(String id) => '/sessions/$id/complete';
+  static const String reports = '/reports';
+  static const String reportsMine = '/reports/mine';
   static const String chatSocket = '/chat';
 }

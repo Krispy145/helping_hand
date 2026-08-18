@@ -4,6 +4,7 @@ import { CreateRequestDto } from './dto/create-request.dto';
 import { RequestStatus } from '@prisma/client';
 import { toPublicRequest } from '../common/public-serializers';
 import { approximateLocation } from '../common/geo-hash';
+import { containsPii } from '../vetting/stage1-filters';
 import { VettingService } from '../vetting/vetting.service';
 
 @Injectable()
@@ -26,11 +27,15 @@ export class RequestsService {
     }
 
     const approx = approximateLocation(dto.lat, dto.lng);
+    const originalText = `${dto.title} ${dto.description}`;
+    const redactPii = containsPii(originalText);
     const request = await this.prisma.request.create({
       data: {
         userId,
-        title: dto.title,
-        description: dto.description,
+        title: redactPii ? '[details removed]' : dto.title,
+        description: redactPii
+          ? 'Contact details were removed after vetting.'
+          : dto.description,
         category: dto.category,
         urgency: dto.urgency,
         lat: dto.lat,
@@ -42,10 +47,7 @@ export class RequestsService {
       },
     });
 
-    const vetting = await this.vetting.vetRequest(
-      request.id,
-      `${dto.title} ${dto.description}`,
-    );
+    const vetting = await this.vetting.vetRequest(request.id, originalText);
     const updated = await this.prisma.request.findUnique({
       where: { id: request.id },
     });
@@ -64,6 +66,9 @@ export class RequestsService {
 
   async findAll() {
     const requests = await this.prisma.request.findMany({
+      where: {
+        status: { in: [RequestStatus.APPROVED, RequestStatus.IN_PROGRESS] },
+      },
       orderBy: { createdAt: 'desc' },
     });
     return requests.map((request) => toPublicRequest(request));

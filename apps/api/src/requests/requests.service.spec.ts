@@ -113,6 +113,38 @@ describe('RequestsService', () => {
     expect(mockVetting.vetRequest).toHaveBeenCalled();
   });
 
+  it('never persists phone numbers when creating a request', async () => {
+    mockPrisma.request.create.mockImplementation(({ data }) => ({
+      id: 'req-pii',
+      ...data,
+      category: data.category ?? null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }));
+    mockPrisma.request.findUnique.mockImplementation(
+      () => mockPrisma.request.create.mock.results[0]?.value,
+    );
+
+    await service.create('user-1', {
+      title: 'Call me',
+      description: 'My number is 082 123 4567',
+      urgency: RequestUrgency.MEDIUM,
+      lat: -33.92,
+      lng: 18.42,
+    });
+
+    expect(mockPrisma.request.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        title: '[details removed]',
+        description: 'Contact details were removed after vetting.',
+      }),
+    });
+    expect(mockVetting.vetRequest).toHaveBeenCalledWith(
+      'req-pii',
+      'Call me My number is 082 123 4567',
+    );
+  });
+
   it('queries map bounds against approx coordinates', async () => {
     mockPrisma.request.findMany.mockResolvedValue([]);
 
@@ -127,5 +159,18 @@ describe('RequestsService', () => {
         }),
       }),
     );
+  });
+
+  it('lists only approved and in-progress requests', async () => {
+    mockPrisma.request.findMany.mockResolvedValue([]);
+
+    await service.findAll();
+
+    expect(mockPrisma.request.findMany).toHaveBeenCalledWith({
+      where: {
+        status: { in: [RequestStatus.APPROVED, RequestStatus.IN_PROGRESS] },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
   });
 });

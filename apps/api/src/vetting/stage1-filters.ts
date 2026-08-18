@@ -21,9 +21,9 @@ export type Stage1Match = {
 
 const PII_EMAIL = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i;
 const PII_PHONE =
-  /(?:\+|00)\d{1,3}[\s.-]?(?:\d{2,4}[\s.-]?){2,3}\d{3,4}|\b0\d{2}[\s.-]?\d{3}[\s.-]?\d{4}\b/;
+  /(?:\+|00)\d{1,3}[\s.-]*(?:\d{2,4}[\s.-]*){2,3}\d{3,4}|\b0\d{2}[\s.-]*\d{3}[\s.-]*\d{4}\b/;
 const PII_HANDLE =
-  /(?:\b(?:whatsapp|telegram|instagram|facebook|tiktok)\b|\bt\.me\/|instagram\.com\/)|(?:^|[\s])@[a-z0-9._]{3,}\b/i;
+  /(?:t\.me\/|wa\.me\/|instagram\.com\/|facebook\.com\/|fb\.me\/|tiktok\.com\/)|(?:^|[\s])@[a-z0-9._]{3,}\b|(?:\b(?:whatsapp|telegram|instagram|facebook|tiktok)\s+(?:me|at)\b)|(?:\b(?:on|via|my)\s+(?:whatsapp|telegram|instagram|facebook|tiktok)\b)|(?:\bdm me\b)/i;
 
 const CRISIS_PATTERNS = [
   /\bsuicid(?:e|al)\b/i,
@@ -54,19 +54,14 @@ const MONEY_KEYWORDS = [
   'wire me',
 ];
 
-export function matchStage1Filters(text: string): Stage1Match | null {
-  if (PII_EMAIL.test(text) || PII_PHONE.test(text) || PII_HANDLE.test(text)) {
-    return {
-      triggeredRule: 'Stage 1: PII leak',
-      reasonCode: 'PII_LEAK',
-      userMessage:
-        'Please remove phone numbers, emails, or social handles. Keep contact inside the app.',
-      showHelplines: false,
-      helplines: [],
-      confidenceScore: 1,
-    };
-  }
+export function containsPii(text: string): boolean {
+  const stripped = text.replace(/[()[\]]/g, ' ');
+  return (
+    PII_EMAIL.test(text) || PII_PHONE.test(stripped) || PII_HANDLE.test(text)
+  );
+}
 
+export function matchStage1Filters(text: string): Stage1Match | null {
   if (CRISIS_PATTERNS.some((pattern) => pattern.test(text))) {
     return {
       triggeredRule: 'Stage 1: Crisis / self-harm',
@@ -75,6 +70,18 @@ export function matchStage1Filters(text: string): Stage1Match | null {
         'Helping Hand is not an emergency service. If you are in crisis, please contact a helpline now.',
       showHelplines: true,
       helplines: ZA_CRISIS_HELPLINES,
+      confidenceScore: 1,
+    };
+  }
+
+  if (containsPii(text)) {
+    return {
+      triggeredRule: 'Stage 1: PII leak',
+      reasonCode: 'PII_LEAK',
+      userMessage:
+        'Please remove phone numbers, emails, or social handles. Keep contact inside the app.',
+      showHelplines: false,
+      helplines: [],
       confidenceScore: 1,
     };
   }

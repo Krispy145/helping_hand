@@ -8,6 +8,7 @@ import 'package:ui/ui.dart';
 import '../../../router.dart';
 import '../../auth/presentation/widgets/profile_avatar.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../verification/presentation/verification_gate.dart';
 import 'settings_controller.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -28,6 +29,20 @@ class SettingsScreen extends ConsumerWidget {
         child: Column(
           children: [
             const ProfileAvatar(),
+            const SizedBox(height: 32),
+            _buildSectionHeader(context, 'Safety'),
+            Card(
+              child: ListTile(
+                title: const Text('Identity check'),
+                subtitle: Text(
+                  isVerifiedAdult(ref.watch(authProvider).asData?.value)
+                      ? 'Verified adult'
+                      : 'Required before asking for or offering help',
+                ),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                onTap: () => context.push(AppRoutes.verification),
+              ),
+            ),
             const SizedBox(height: 32),
             _buildSectionHeader(context, t.strings.settings.theme.title),
             Card(

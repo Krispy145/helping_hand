@@ -6,6 +6,7 @@ import 'package:ui/ui.dart';
 import '../../../router.dart';
 import '../../map/presentation/map_screen.dart';
 import '../../requests/providers/request_provider.dart';
+import '../../verification/presentation/verification_gate.dart';
 import 'feed_screen.dart';
 import 'home_controller.dart';
 
@@ -72,7 +73,15 @@ class HomeScreen extends ConsumerWidget {
             child: const Icon(Icons.refresh),
           ),
           const SizedBox(height: 16),
-          FloatingActionButton(heroTag: 'add_request', onPressed: () => context.push(AppRoutes.createRequest), child: const Icon(Icons.add)),
+          FloatingActionButton(
+            heroTag: 'add_request',
+            onPressed: () async {
+              if (await ensureVerifiedAdult(context, ref) && context.mounted) {
+                await context.push(AppRoutes.createRequest);
+              }
+            },
+            child: const Icon(Icons.add),
+          ),
         ],
       ),
     );

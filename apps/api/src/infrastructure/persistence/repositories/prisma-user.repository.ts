@@ -61,6 +61,11 @@ export class PrismaUserRepository implements IUserRepository {
       password: prismaUser.password,
       name: prismaUser.name,
       role: prismaUser.role as UserRole,
+      verificationStatus: prismaUser.verificationStatus,
+      verificationProvider: prismaUser.verificationProvider,
+      verificationProviderRef: prismaUser.verificationProviderRef,
+      verifiedAt: prismaUser.verifiedAt,
+      verificationFailureReason: prismaUser.verificationFailureReason,
       createdAt: prismaUser.createdAt,
       updatedAt: prismaUser.updatedAt,
     });

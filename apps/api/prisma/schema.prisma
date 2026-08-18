@@ -16,14 +16,34 @@ enum Role {
   MODERATOR
 }
 
+enum VerificationStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+  FAILED
+}
+
+enum VerificationFailureReason {
+  UNDERAGE
+  PROVIDER_REJECTED
+  EXPIRED
+}
+
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  name      String?
-  role      Role     @default(USER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                         String                      @id @default(uuid())
+  email                      String                      @unique
+  password                   String
+  name                       String?
+  role                       Role                        @default(USER)
+  verificationStatus         VerificationStatus          @default(UNVERIFIED)
+  verificationProvider       String?
+  verificationProviderRef    String?                     @unique
+  verifiedAt                 DateTime?
+  verificationFailureReason  VerificationFailureReason?
+  createdAt                  DateTime                    @default(now())
+  updatedAt                  DateTime                    @updatedAt
+
+  @@index([verificationStatus])
 
   requests       Request[]
   helperSessions Session[] @relation("HelperSessions")

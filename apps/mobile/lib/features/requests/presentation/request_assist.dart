@@ -6,8 +6,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:models/models.dart';
 
+import '../../auth/providers/auth_provider.dart';
 import '../../chat/data/chat_models.dart';
 import '../../chat/data/chat_repository.dart';
+import '../../verification/presentation/verification_gate.dart';
 import '../providers/request_provider.dart';
 
 extension RequestBusyX on RequestDto {
@@ -31,13 +33,25 @@ Future<void> openOrStartAssist({
   final nearby = ref.read(nearbyRequestsProvider.notifier);
 
   try {
-    final availability = await repository.checkOfferAvailability(request.id);
+    var availability = await repository.checkOfferAvailability(request.id);
 
     if (availability.sessionId != null) {
       if (context.mounted) {
         await context.push('/session/${availability.sessionId}');
       }
       return;
+    }
+
+    if (availability.reason == 'unverified' ||
+        availability.reason == 'underage' ||
+        !isVerifiedAdult(ref.read(authProvider).asData?.value)) {
+      final verified = await ensureVerifiedAdult(context, ref);
+      if (!verified || !context.mounted) return;
+      availability = await repository.checkOfferAvailability(request.id);
+      if (availability.sessionId != null) {
+        await context.push('/session/${availability.sessionId}');
+        return;
+      }
     }
 
     if (!availability.open) {
@@ -69,6 +83,8 @@ Future<void> openOrStartAssist({
     final status = error.response?.statusCode;
     final message = status == 409
         ? 'Someone is already helping with this request.'
+        : status == 403
+        ? 'Verify your identity before offering help.'
         : 'Failed to start session: ${error.message}';
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   } catch (error) {

@@ -13,5 +13,8 @@ class ApiEndpoints {
   static String sessionComplete(String id) => '/sessions/$id/complete';
   static const String reports = '/reports';
   static const String reportsMine = '/reports/mine';
+  static const String verificationStatus = '/verification/status';
+  static const String verificationStart = '/verification/start';
+  static const String verificationStubComplete = '/verification/stub-complete';
   static const String chatSocket = '/chat';
 }

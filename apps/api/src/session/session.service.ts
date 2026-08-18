@@ -1,14 +1,48 @@
-import { Injectable, ConflictException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../infrastructure/persistence/prisma/prisma.service';
-import { Message, Prisma, RequestStatus, SessionStatus } from '@prisma/client';
+import {
+  Message,
+  Prisma,
+  RequestStatus,
+  SessionStatus,
+  VerificationFailureReason,
+  VerificationStatus,
+} from '@prisma/client';
 
-type SessionWithRequest = Prisma.SessionGetPayload<{ include: { request: true } }>;
+type SessionWithRequest = Prisma.SessionGetPayload<{
+  include: { request: true };
+}>;
 
 @Injectable()
 export class SessionService {
   constructor(private prisma: PrismaService) {}
 
   async checkOfferAvailability(requestId: string, helperId: string) {
+    const helper = await this.prisma.user.findUnique({
+      where: { id: helperId },
+      select: {
+        verificationStatus: true,
+        verificationFailureReason: true,
+      },
+    });
+    if (!helper) throw new NotFoundException('User not found');
+    if (helper.verificationStatus !== VerificationStatus.VERIFIED) {
+      return {
+        open: false,
+        busy: false,
+        reason:
+          helper.verificationFailureReason ===
+          VerificationFailureReason.UNDERAGE
+            ? 'underage'
+            : 'unverified',
+      };
+    }
+
     const request = await this.prisma.request.findUnique({
       where: { id: requestId },
       include: { session: true },
@@ -66,13 +100,18 @@ export class SessionService {
         return created.id;
       });
 
-      const request = await this.prisma.request.findUnique({ where: { id: requestId } });
+      const request = await this.prisma.request.findUnique({
+        where: { id: requestId },
+      });
       if (request) {
         await this.ensureRequestIntroMessage(sessionId, request);
       }
       return this.getSession(sessionId, helperId);
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
         throw new ConflictException('This request is already busy');
       }
       throw error;
@@ -113,13 +152,18 @@ export class SessionService {
     };
   }
 
-  async saveMessage(sessionId: string, senderId: string, content: string): Promise<Message> {
+  async saveMessage(
+    sessionId: string,
+    senderId: string,
+    content: string,
+  ): Promise<Message> {
     const session = await this.prisma.session.findUnique({
       where: { id: sessionId },
       include: { request: true },
     });
     if (!session) throw new NotFoundException('Session not found');
-    if (session.status !== SessionStatus.ACTIVE) throw new ForbiddenException('Session is not active');
+    if (session.status !== SessionStatus.ACTIVE)
+      throw new ForbiddenException('Session is not active');
     this.assertParticipant(session, senderId);
 
     return this.prisma.message.create({
@@ -300,7 +344,13 @@ export class SessionService {
 
   private async ensureRequestIntroMessage(
     sessionId: string,
-    request: { userId: string; title: string; description: string; category?: string | null; urgency: string },
+    request: {
+      userId: string;
+      title: string;
+      description: string;
+      category?: string | null;
+      urgency: string;
+    },
   ) {
     const existing = await this.prisma.message.count({ where: { sessionId } });
     if (existing > 0) return;

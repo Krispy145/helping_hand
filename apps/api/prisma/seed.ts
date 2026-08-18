@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { PrismaClient, RequestStatus, RequestUrgency, Role } from '@prisma/client';
+import { PrismaClient, RequestStatus, RequestUrgency, Role, VerificationStatus } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { approximateLocation } from '../src/common/geo-hash';
 
@@ -121,6 +121,9 @@ async function main() {
       password,
       name: displayName(index + 1),
       role: Role.USER,
+      verificationStatus: VerificationStatus.VERIFIED,
+      verificationProvider: 'stub',
+      verifiedAt: new Date(),
     })),
   });
 

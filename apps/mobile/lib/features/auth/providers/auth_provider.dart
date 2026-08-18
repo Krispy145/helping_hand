@@ -100,6 +100,12 @@ class AuthNotifier extends AsyncNotifier<UserDto?> with ListenableNotifier {
     });
   }
 
+  Future<void> refreshProfile() async {
+    final user = await _repository.getProfile();
+    await _cacheUser(user);
+    state = AsyncValue.data(user);
+  }
+
   Future<void> logout() async {
     await _clearAuthStorage();
     final prefs = ref.read(sharedPreferencesProvider);

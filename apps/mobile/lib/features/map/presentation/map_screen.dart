@@ -6,6 +6,7 @@ import 'package:map/map.dart';
 import 'package:models/models.dart';
 import 'package:ui/ui.dart';
 
+import '../../chat/data/chat_models.dart';
 import '../../chat/data/chat_repository.dart';
 import '../../requests/data/request_repository.dart';
 import '../../requests/presentation/request_assist.dart';
@@ -23,10 +24,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   static const _capeTownCenter = LatLng(-33.9249, 18.4241);
   static const _userZoom = 14.0;
   static const _capeTownOverviewZoom = 11.0;
+  static final _emptyClusterIndex = MapClusterIndex<RequestDto>.build(const []);
+
   final MapController _mapController = MapController();
   Timer? _idleRefreshTimer;
   String? _lastBoundsKey;
   bool _didCenterOnUser = false;
+  MapClusterIndex<RequestDto> _clusterIndex = _emptyClusterIndex;
+  int? _clusterSignature;
 
   @override
   void dispose() {
@@ -56,39 +61,15 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       _centerOnUser(userLocation);
     });
 
-    final requestMarkers = requestsAsync.maybeWhen(
+    final clusterIndex = requestsAsync.maybeWhen(
       skipLoadingOnReload: true,
       skipLoadingOnRefresh: true,
-      data: (requests) {
-        return requests.where((req) => req.lat != null && req.lng != null).map((req) {
-          final mine = sessionForRequest(mySessions, req.id);
-          final busy = req.isBusy;
-          return Marker(
-            key: ValueKey('request-${req.id}-${req.status.name}'),
-            point: LatLng(req.lat!, req.lng!),
-            width: 40,
-            height: 40,
-            child: GestureDetector(
-              onTap: () => _showRequestDetails(context, ref, req, mine != null),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: busy ? const Color(0xFF9AA0A6) : context.primary,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: context.surface, width: 2),
-                  boxShadow: [BoxShadow(color: context.shadow.withValues(alpha: 0.2), blurRadius: 4, offset: const Offset(0, 2))],
-                ),
-                child: Icon(Icons.handshake, color: context.surface, size: 20),
-              ),
-            ),
-          );
-        }).toList();
-      },
-      orElse: () => <Marker>[],
+      data: _indexFor,
+      orElse: () => _clusterIndex,
     );
 
-    final markers = [...requestMarkers];
-    if (location != null) {
-      markers.add(
+    final overlayMarkers = <Marker>[
+      if (location != null)
         Marker(
           point: location,
           width: 24,
@@ -103,8 +84,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             child: Center(child: Icon(Icons.circle, size: 12, color: context.onInformation)),
           ),
         ),
-      );
-    }
+    ];
 
     return Scaffold(
       body: Stack(
@@ -113,7 +93,22 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             mapController: _mapController,
             initialCenter: location ?? _capeTownCenter,
             initialZoom: location != null ? _userZoom : _capeTownOverviewZoom,
-            markers: markers,
+            markers: overlayMarkers,
+            layers: [
+              ClusteredMarkerLayer<RequestDto>(
+                index: clusterIndex,
+                pointBuilder: (context, req) => RequestMapPin(busy: req.isBusy),
+                clusterBuilder: (context, cluster) {
+                  final allBusy = cluster.items.every((req) => req.isBusy);
+                  return RequestMapPin(busy: allBusy, badgeCount: cluster.count);
+                },
+                onPointTap: (req) {
+                  final mine = sessionForRequest(mySessions, req.id);
+                  _showRequestDetails(context, ref, req, mine != null);
+                },
+                onClusterTap: (cluster) => _onClusterTap(context, ref, cluster, mySessions),
+              ),
+            ],
             onMapReady: _scheduleVisibleRefresh,
             onMapEvent: _onMapEvent,
           ),
@@ -214,6 +209,67 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final latSpan = (bounds.maxLat - bounds.minLat).abs();
     final lngSpan = (bounds.maxLng - bounds.minLng).abs();
     return latSpan > 0.0005 && lngSpan > 0.0005;
+  }
+
+  MapClusterIndex<RequestDto> _indexFor(List<RequestDto> requests) {
+    var signature = requests.length;
+    for (final req in requests) {
+      signature = Object.hash(signature, req.id, req.lat, req.lng, req.status);
+    }
+    if (signature == _clusterSignature) return _clusterIndex;
+
+    _clusterSignature = signature;
+    return _clusterIndex = MapClusterIndex.build([
+      for (final req in requests)
+        if (req.lat != null && req.lng != null) ClusterPoint(id: req.id, position: LatLng(req.lat!, req.lng!), data: req),
+    ]);
+  }
+
+  void _onClusterTap(BuildContext context, WidgetRef ref, MapClusterGroup<RequestDto> cluster, List<ChatSessionDetails>? mySessions) {
+    final currentZoom = _mapController.camera.zoom;
+    if (cluster.isCoincident || currentZoom >= 17.5) {
+      _showClusterList(context, ref, cluster.items, mySessions);
+      return;
+    }
+
+    _mapController.fitCamera(
+      CameraFit.bounds(
+        bounds: cluster.bounds,
+        padding: const EdgeInsets.fromLTRB(48, 140, 48, 48),
+        maxZoom: 18,
+      ),
+    );
+  }
+
+  void _showClusterList(BuildContext context, WidgetRef ref, List<RequestDto> requests, List<ChatSessionDetails>? mySessions) {
+    showModalBottomSheet<void>(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) {
+        return SafeArea(
+          child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.fromLTRB(8, 16, 8, 24),
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                child: Text('${requests.length} requests here', style: context.h2),
+              ),
+              for (final req in requests)
+                ListTile(
+                  title: Text(req.title),
+                  subtitle: Text(req.isBusy ? 'Busy — someone is helping' : req.description, maxLines: 2, overflow: TextOverflow.ellipsis),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    final mine = sessionForRequest(mySessions, req.id);
+                    _showRequestDetails(context, ref, req, mine != null);
+                  },
+                ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   void _showRequestDetails(BuildContext context, WidgetRef ref, RequestDto req, bool isMine) {

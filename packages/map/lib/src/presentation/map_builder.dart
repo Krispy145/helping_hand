@@ -6,6 +6,7 @@ class MapBuilder extends StatelessWidget {
   final LatLng? initialCenter;
   final double initialZoom;
   final List<Marker> markers;
+  final List<Widget> layers;
   final MapController? mapController;
   final VoidCallback? onMapReady;
   final void Function(MapEvent event)? onMapEvent;
@@ -15,6 +16,7 @@ class MapBuilder extends StatelessWidget {
     this.initialCenter,
     this.initialZoom = 11.0,
     this.markers = const [],
+    this.layers = const [],
     this.mapController,
     this.onMapReady,
     this.onMapEvent,
@@ -53,10 +55,12 @@ class MapBuilder extends StatelessWidget {
       ),
       children: [
         if (isDark) ColorFiltered(colorFilter: _darkTileFilter, child: tiles) else tiles,
-        MarkerLayer(
-          key: ValueKey(markers.map((marker) => '${marker.point.latitude},${marker.point.longitude}').join('|')),
-          markers: markers,
-        ),
+        ...layers,
+        if (markers.isNotEmpty)
+          MarkerLayer(
+            key: ValueKey(markers.map((marker) => '${marker.point.latitude},${marker.point.longitude}').join('|')),
+            markers: markers,
+          ),
         SafeArea(
           child: RichAttributionWidget(
             attributions: [

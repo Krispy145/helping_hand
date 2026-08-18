@@ -16,6 +16,7 @@ const auth_module_1 = require("./auth/auth.module");
 const requests_module_1 = require("./requests/requests.module");
 const vetting_module_1 = require("./vetting/vetting.module");
 const session_module_1 = require("./session/session.module");
+const reports_module_1 = require("./reports/reports.module");
 const event_emitter_1 = require("@nestjs/event-emitter");
 let AppModule = class AppModule {
 };
@@ -30,6 +31,7 @@ exports.AppModule = AppModule = __decorate([
             requests_module_1.RequestsModule,
             vetting_module_1.VettingModule,
             session_module_1.SessionModule,
+            reports_module_1.ReportsModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

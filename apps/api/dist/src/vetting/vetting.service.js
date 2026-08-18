@@ -41,6 +41,23 @@ let VettingService = VettingService_1 = class VettingService {
             where: { id: requestId },
             data: { status: newStatus },
         });
+        if (hasRestrictedContent) {
+            const request = await this.prisma.request.findUnique({
+                where: { id: requestId },
+                select: { userId: true },
+            });
+            if (request) {
+                await this.prisma.safetyIncident.create({
+                    data: {
+                        userId: request.userId,
+                        source: client_1.SafetyIncidentSource.REQUEST_VETTING,
+                        reasonCode: 'RESTRICTED_CONTENT',
+                        detailsRedacted: 'Keyword filter matched restricted content.',
+                        requestId,
+                    },
+                });
+            }
+        }
         this.logger.log(`Request ${requestId} vetted. Status: ${newStatus} ${hasRestrictedContent ? '(Restricted content found)' : ''}`);
     }
 };

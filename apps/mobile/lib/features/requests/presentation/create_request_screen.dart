@@ -70,18 +70,50 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen> {
     );
 
     try {
-      await ref.read(requestProvider.notifier).createRequest(dto);
-      if (mounted) {
-        context.pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Request created successfully!')),
-        );
+      final created = await ref.read(requestProvider.notifier).createRequest(dto);
+      if (!mounted) return;
+      if (created?.status == RequestStatusDto.REJECTED) {
+        await _showRejection(created!);
+        return;
       }
+      context.pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Request created successfully!')),
+      );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     }
+  }
+
+  Future<void> _showRejection(RequestDto created) async {
+    final vetting = created.vetting;
+    final helplines = vetting?.helplines ?? const <HelplineDto>[];
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text((vetting?.showHelplines ?? false) ? 'Get support now' : 'Request not published'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(vetting?.userMessage ?? 'This request could not be shown to helpers.'),
+            if (helplines.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              for (final line in helplines)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text('${line.name}: ${line.phone}'),
+                ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('OK')),
+        ],
+      ),
+    );
   }
 
   @override

@@ -192,6 +192,8 @@ model SafetyIncident {
   user            User?                 @relation(fields: [userId], references: [id])
   source          SafetyIncidentSource
   reasonCode      String
+  triggeredRule   String?
+  confidenceScore Float?
   detailsRedacted String?
   reportId        String?
   report          Report?               @relation(fields: [reportId], references: [id])

@@ -1,9 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return */
 import { BadRequestException } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import { RequestStatus, RequestUrgency } from '@prisma/client';
 import { PrismaService } from '../infrastructure/persistence/prisma/prisma.service';
+import { VettingService } from '../vetting/vetting.service';
 import { RequestsService } from './requests.service';
 
 describe('RequestsService', () => {
@@ -13,21 +13,39 @@ describe('RequestsService', () => {
     request: {
       create: jest.fn(),
       findMany: jest.fn(),
+      findUnique: jest.fn(),
     },
     $queryRaw: jest.fn(),
   };
 
-  const mockEvents = {
-    emit: jest.fn(),
+  const mockVetting = {
+    vetRequest: jest.fn().mockResolvedValue({
+      status: RequestStatus.APPROVED,
+      triggeredRule: null,
+      reasonCode: null,
+      userMessage: null,
+      showHelplines: false,
+      helplines: [],
+      confidenceScore: null,
+    }),
   };
 
   beforeEach(async () => {
     jest.clearAllMocks();
+    mockVetting.vetRequest.mockResolvedValue({
+      status: RequestStatus.APPROVED,
+      triggeredRule: null,
+      reasonCode: null,
+      userMessage: null,
+      showHelplines: false,
+      helplines: [],
+      confidenceScore: null,
+    });
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RequestsService,
         { provide: PrismaService, useValue: mockPrisma },
-        { provide: EventEmitter2, useValue: mockEvents },
+        { provide: VettingService, useValue: mockVetting },
       ],
     }).compile();
 
@@ -72,6 +90,9 @@ describe('RequestsService', () => {
         updatedAt: createdAt,
       };
     });
+    mockPrisma.request.findUnique.mockImplementation(
+      () => mockPrisma.request.create.mock.results[0]?.value,
+    );
 
     const result = await service.create('user-1', {
       title: 'Need groceries',
@@ -89,7 +110,39 @@ describe('RequestsService', () => {
     expect(result.lng).toBe(
       mockPrisma.request.create.mock.calls[0][0].data.approxLng,
     );
-    expect(mockEvents.emit).toHaveBeenCalled();
+    expect(mockVetting.vetRequest).toHaveBeenCalled();
+  });
+
+  it('never persists phone numbers when creating a request', async () => {
+    mockPrisma.request.create.mockImplementation(({ data }) => ({
+      id: 'req-pii',
+      ...data,
+      category: data.category ?? null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }));
+    mockPrisma.request.findUnique.mockImplementation(
+      () => mockPrisma.request.create.mock.results[0]?.value,
+    );
+
+    await service.create('user-1', {
+      title: 'Call me',
+      description: 'My number is 082 123 4567',
+      urgency: RequestUrgency.MEDIUM,
+      lat: -33.92,
+      lng: 18.42,
+    });
+
+    expect(mockPrisma.request.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        title: '[details removed]',
+        description: 'Contact details were removed after vetting.',
+      }),
+    });
+    expect(mockVetting.vetRequest).toHaveBeenCalledWith(
+      'req-pii',
+      'Call me My number is 082 123 4567',
+    );
   });
 
   it('queries map bounds against approx coordinates', async () => {
@@ -106,5 +159,18 @@ describe('RequestsService', () => {
         }),
       }),
     );
+  });
+
+  it('lists only approved and in-progress requests', async () => {
+    mockPrisma.request.findMany.mockResolvedValue([]);
+
+    await service.findAll();
+
+    expect(mockPrisma.request.findMany).toHaveBeenCalledWith({
+      where: {
+        status: { in: [RequestStatus.APPROVED, RequestStatus.IN_PROGRESS] },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
   });
 });

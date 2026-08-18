@@ -1,17 +1,17 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { RequestCreatedEvent } from './events/request-created.event';
 import { PrismaService } from '../infrastructure/persistence/prisma/prisma.service';
 import { CreateRequestDto } from './dto/create-request.dto';
 import { RequestStatus } from '@prisma/client';
 import { toPublicRequest } from '../common/public-serializers';
 import { approximateLocation } from '../common/geo-hash';
+import { containsPii } from '../vetting/stage1-filters';
+import { VettingService } from '../vetting/vetting.service';
 
 @Injectable()
 export class RequestsService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly eventEmitter: EventEmitter2,
+    private readonly vetting: VettingService,
   ) {}
 
   async create(userId: string, dto: CreateRequestDto) {
@@ -27,11 +27,15 @@ export class RequestsService {
     }
 
     const approx = approximateLocation(dto.lat, dto.lng);
+    const originalText = `${dto.title} ${dto.description}`;
+    const redactPii = containsPii(originalText);
     const request = await this.prisma.request.create({
       data: {
         userId,
-        title: dto.title,
-        description: dto.description,
+        title: redactPii ? '[details removed]' : dto.title,
+        description: redactPii
+          ? 'Contact details were removed after vetting.'
+          : dto.description,
         category: dto.category,
         urgency: dto.urgency,
         lat: dto.lat,
@@ -43,16 +47,28 @@ export class RequestsService {
       },
     });
 
-    this.eventEmitter.emit(
-      'request.created',
-      new RequestCreatedEvent(request.id, request.title, request.description),
-    );
+    const vetting = await this.vetting.vetRequest(request.id, originalText);
+    const updated = await this.prisma.request.findUnique({
+      where: { id: request.id },
+    });
 
-    return toPublicRequest(request);
+    return {
+      ...toPublicRequest(updated ?? request),
+      vetting: {
+        triggered_rule: vetting.triggeredRule,
+        reason_code: vetting.reasonCode,
+        user_message: vetting.userMessage,
+        show_helplines: vetting.showHelplines,
+        helplines: vetting.helplines,
+      },
+    };
   }
 
   async findAll() {
     const requests = await this.prisma.request.findMany({
+      where: {
+        status: { in: [RequestStatus.APPROVED, RequestStatus.IN_PROGRESS] },
+      },
       orderBy: { createdAt: 'desc' },
     });
     return requests.map((request) => toPublicRequest(request));

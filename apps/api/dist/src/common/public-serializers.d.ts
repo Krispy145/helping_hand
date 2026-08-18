@@ -51,4 +51,29 @@ export declare function toPublicRequest(request: PublicRequestSource, options?: 
         updated_at: Date;
     } | undefined;
 };
+type PublicReportSource = {
+    id: string;
+    type: string;
+    severity: string;
+    description: string;
+    status: string;
+    sessionId?: string | null;
+    requestId?: string | null;
+    targetUserId?: string | null;
+    sessionEnded: boolean;
+    createdAt: Date;
+};
+export declare function toPublicReport(report: PublicReportSource): {
+    id: string;
+    type: string;
+    severity: string;
+    description: string;
+    status: string;
+    session_id: string | null;
+    request_id: string | null;
+    target_user_id: string | null;
+    session_ended: boolean;
+    penalizes_reporter: boolean;
+    created_at: Date;
+};
 export {};

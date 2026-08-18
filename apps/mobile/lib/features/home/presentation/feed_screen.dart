@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:models/models.dart';
 import 'package:ui/ui.dart';
 
+import '../../../router.dart';
 import '../../chat/data/chat_repository.dart';
+import '../../reports/presentation/report_entry.dart';
 import '../../requests/presentation/request_assist.dart';
 import '../../requests/providers/request_provider.dart';
 
@@ -48,9 +52,26 @@ class FeedScreen extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  trailing: ElevatedButton(
-                    onPressed: () => openOrStartAssist(context: context, ref: ref, request: req),
-                    child: Text(mine != null ? 'Open chat' : busy ? 'Busy' : 'Assist'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        tooltip: 'Report',
+                        onPressed: () => context.push(
+                          AppRoutes.report,
+                          extra: ReportEntry(
+                            requestId: req.id,
+                            targetUserId: req.user?.id,
+                            suggestedType: ReportTypeDto.HELPEE_MISUSE,
+                          ),
+                        ),
+                        icon: Icon(Icons.flag_outlined, color: context.error),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => openOrStartAssist(context: context, ref: ref, request: req),
+                        child: Text(mine != null ? 'Open chat' : busy ? 'Busy' : 'Assist'),
+                      ),
+                    ],
                   ),
                   onTap: () => openOrStartAssist(context: context, ref: ref, request: req),
                 ),

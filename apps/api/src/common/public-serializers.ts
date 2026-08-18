@@ -50,3 +50,32 @@ export function toPublicRequest(request: PublicRequestSource, options?: { includ
         : undefined,
   };
 }
+
+type PublicReportSource = {
+  id: string;
+  type: string;
+  severity: string;
+  description: string;
+  status: string;
+  sessionId?: string | null;
+  requestId?: string | null;
+  targetUserId?: string | null;
+  sessionEnded: boolean;
+  createdAt: Date;
+};
+
+export function toPublicReport(report: PublicReportSource) {
+  return {
+    id: report.id,
+    type: report.type,
+    severity: report.severity,
+    description: report.description,
+    status: report.status,
+    session_id: report.sessionId ?? null,
+    request_id: report.requestId ?? null,
+    target_user_id: report.targetUserId ?? null,
+    session_ended: report.sessionEnded,
+    penalizes_reporter: false,
+    created_at: report.createdAt,
+  };
+}

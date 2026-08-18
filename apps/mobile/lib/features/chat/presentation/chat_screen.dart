@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:models/models.dart';
 import 'package:ui/ui.dart';
 
+import '../../../router.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../reports/presentation/report_entry.dart';
 import '../../requests/providers/request_provider.dart';
 import '../application/chat_provider.dart';
 import '../data/chat_repository.dart';
@@ -20,6 +22,22 @@ class ChatScreen extends ConsumerStatefulWidget {
 class _ChatScreenState extends ConsumerState<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   bool _busy = false;
+
+  void _openReport() {
+    final session = ref.read(sessionDetailsProvider(widget.sessionId)).asData?.value;
+    final userId = ref.read(authProvider).value?.id;
+    final suggested = session != null && userId == session.helperId ? ReportTypeDto.HELPEE_MISUSE : ReportTypeDto.HELPER_MISCONDUCT;
+    context.push(
+      AppRoutes.report,
+      extra: ReportEntry(
+        sessionId: widget.sessionId,
+        requestId: session?.requestId,
+        targetUserId: session?.otherPartyId(userId),
+        suggestedType: suggested,
+        sessionActive: session?.isActive ?? false,
+      ),
+    );
+  }
 
   @override
   void dispose() {
@@ -120,6 +138,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         ),
         centerTitle: true,
         actions: [
+          IconButton(
+            tooltip: 'Report',
+            onPressed: _openReport,
+            icon: Icon(Icons.flag_outlined, color: context.error),
+          ),
           chatAsync.when(
             data: (state) => Padding(
               padding: const EdgeInsets.only(right: 16),
@@ -205,16 +228,30 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 8),
+                    TextButton(
+                      onPressed: _busy ? null : _openReport,
+                      child: Text('Report a concern', style: TextStyle(color: context.error)),
+                    ),
                     const SizedBox(height: 12),
                   ] else if (sessionAsync.hasValue) ...[
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.only(bottom: 8),
                       child: Text(
-                        sessionAsync.asData!.value.status == 'COMPLETED' ? 'This request is completed.' : 'This assist was cancelled.',
+                        switch (sessionAsync.asData!.value.status) {
+                          'COMPLETED' => 'This request is completed.',
+                          'DISPUTED' => 'This chat ended after a safety report.',
+                          _ => 'This assist was cancelled.',
+                        },
                         style: context.bodySmall,
                         textAlign: TextAlign.center,
                       ),
                     ),
+                    TextButton(
+                      onPressed: _busy ? null : _openReport,
+                      child: Text('Report a concern', style: TextStyle(color: context.error)),
+                    ),
+                    const SizedBox(height: 12),
                   ],
                   Row(
                     children: [

@@ -2,12 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:map/map.dart';
 import 'package:models/models.dart';
 import 'package:ui/ui.dart';
 
+import '../../../router.dart';
 import '../../chat/data/chat_models.dart';
 import '../../chat/data/chat_repository.dart';
+import '../../reports/presentation/report_entry.dart';
 import '../../requests/data/request_repository.dart';
 import '../../requests/presentation/request_assist.dart';
 import '../../requests/providers/request_provider.dart';
@@ -302,6 +305,24 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       ? 'Busy'
                       : 'Offer Help',
                 ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: TextButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  context.push(
+                    AppRoutes.report,
+                    extra: ReportEntry(
+                      requestId: req.id,
+                      targetUserId: req.user?.id,
+                      suggestedType: ReportTypeDto.HELPEE_MISUSE,
+                    ),
+                  );
+                },
+                child: Text('Report this request', style: TextStyle(color: context.error)),
               ),
             ),
           ],

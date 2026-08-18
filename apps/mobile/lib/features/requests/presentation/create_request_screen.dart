@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:map/map.dart';
 import 'package:models/models.dart';
 
 import '../providers/request_provider.dart';
@@ -19,6 +20,7 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen> {
   final _categoryController = TextEditingController();
 
   RequestUrgencyDto _urgency = RequestUrgencyDto.MEDIUM;
+  bool _locating = false;
 
   @override
   void dispose() {
@@ -28,27 +30,54 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen> {
     super.dispose();
   }
 
-  Future<void> _submit() async {
-    if (_formKey.currentState!.validate()) {
-      final dto = CreateRequestDto(
-        title: _titleController.text,
-        description: _descController.text,
-        category: _categoryController.text,
-        urgency: _urgency,
-        lat: -33.9249, // Cape Town CBD — matches approx seed bins
-        lng: 18.4241,
-      );
+  Future<LatLng?> _resolveLocation() async {
+    final cached = ref.read(userLocationProvider).asData?.value;
+    if (cached != null) return cached;
 
-      try {
-        await ref.read(requestProvider.notifier).createRequest(dto);
-        if (mounted) {
-          context.pop(); // Return to previous screen on success
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Request created successfully!')));
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
-        }
+    setState(() => _locating = true);
+    try {
+      return await ref.refresh(userLocationProvider.future);
+    } finally {
+      if (mounted) setState(() => _locating = false);
+    }
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final location = await _resolveLocation();
+    if (location == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Turn on location so helpers can find this request nearby.',
+          ),
+        ),
+      );
+      return;
+    }
+
+    final dto = CreateRequestDto(
+      title: _titleController.text,
+      description: _descController.text,
+      category: _categoryController.text,
+      urgency: _urgency,
+      lat: location.latitude,
+      lng: location.longitude,
+    );
+
+    try {
+      await ref.read(requestProvider.notifier).createRequest(dto);
+      if (mounted) {
+        context.pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Request created successfully!')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     }
   }
@@ -56,7 +85,8 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(requestProvider);
-    final isLoading = state.isLoading;
+    final isLoading = state.isLoading || _locating;
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Ask for Help')),
@@ -96,8 +126,20 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen> {
                   }
                 },
               ),
+              const SizedBox(height: 16),
+              Text(
+                'Helpers see an approximate area, not your exact spot. Precise location is only shared after a session starts and you both agree.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
               const SizedBox(height: 24),
-              ElevatedButton(onPressed: isLoading ? null : _submit, child: isLoading ? const CircularProgressIndicator() : const Text('Submit Request')),
+              ElevatedButton(
+                onPressed: isLoading ? null : _submit,
+                child: isLoading
+                    ? const CircularProgressIndicator()
+                    : const Text('Submit Request'),
+              ),
             ],
           ),
         ),

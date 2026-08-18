@@ -16,12 +16,17 @@ type PublicRequestSource = {
   urgency: string;
   lat?: number | null;
   lng?: number | null;
+  approxLat?: number | null;
+  approxLng?: number | null;
   createdAt: Date;
   updatedAt: Date;
   user?: PublicUserSource | null;
 };
 
-export function toPublicUser(user: PublicUserSource, options?: { includeEmail?: boolean }) {
+export function toPublicUser(
+  user: PublicUserSource,
+  options?: { includeEmail?: boolean },
+) {
   return {
     id: user.id,
     email: options?.includeEmail ? user.email : '',
@@ -32,7 +37,10 @@ export function toPublicUser(user: PublicUserSource, options?: { includeEmail?: 
   };
 }
 
-export function toPublicRequest(request: PublicRequestSource, options?: { includeRequester?: boolean }) {
+export function toPublicRequest(
+  request: PublicRequestSource,
+  options?: { includeRequester?: boolean },
+) {
   return {
     id: request.id,
     title: request.title,
@@ -40,8 +48,8 @@ export function toPublicRequest(request: PublicRequestSource, options?: { includ
     category: request.category,
     status: request.status,
     urgency: request.urgency,
-    lat: request.lat,
-    lng: request.lng,
+    lat: request.approxLat ?? null,
+    lng: request.approxLng ?? null,
     created_at: request.createdAt,
     updated_at: request.updatedAt,
     user:

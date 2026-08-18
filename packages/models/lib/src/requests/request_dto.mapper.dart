@@ -133,6 +133,7 @@ class RequestDtoMapper extends ClassMapperBase<RequestDto> {
       MapperContainer.globals.use(_instance = RequestDtoMapper._());
       RequestStatusDtoMapper.ensureInitialized();
       RequestUrgencyDtoMapper.ensureInitialized();
+      VettingFeedbackDtoMapper.ensureInitialized();
       UserDtoMapper.ensureInitialized();
     }
     return _instance!;
@@ -190,6 +191,12 @@ class RequestDtoMapper extends ClassMapperBase<RequestDto> {
     _$updatedAt,
     key: r'updated_at',
   );
+  static VettingFeedbackDto? _$vetting(RequestDto v) => v.vetting;
+  static const Field<RequestDto, VettingFeedbackDto> _f$vetting = Field(
+    'vetting',
+    _$vetting,
+    opt: true,
+  );
   static UserDto? _$user(RequestDto v) => v.user;
   static const Field<RequestDto, UserDto> _f$user = Field(
     'user',
@@ -209,6 +216,7 @@ class RequestDtoMapper extends ClassMapperBase<RequestDto> {
     #lng: _f$lng,
     #createdAt: _f$createdAt,
     #updatedAt: _f$updatedAt,
+    #vetting: _f$vetting,
     #user: _f$user,
   };
 
@@ -224,6 +232,7 @@ class RequestDtoMapper extends ClassMapperBase<RequestDto> {
       lng: data.dec(_f$lng),
       createdAt: data.dec(_f$createdAt),
       updatedAt: data.dec(_f$updatedAt),
+      vetting: data.dec(_f$vetting),
       user: data.dec(_f$user),
     );
   }
@@ -288,6 +297,8 @@ extension RequestDtoValueCopy<$R, $Out>
 
 abstract class RequestDtoCopyWith<$R, $In extends RequestDto, $Out>
     implements ClassCopyWith<$R, $In, $Out> {
+  VettingFeedbackDtoCopyWith<$R, VettingFeedbackDto, VettingFeedbackDto>?
+  get vetting;
   UserDtoCopyWith<$R, UserDto, UserDto>? get user;
   $R call({
     String? id,
@@ -300,6 +311,7 @@ abstract class RequestDtoCopyWith<$R, $In extends RequestDto, $Out>
     double? lng,
     DateTime? createdAt,
     DateTime? updatedAt,
+    VettingFeedbackDto? vetting,
     UserDto? user,
   });
   RequestDtoCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t);
@@ -313,6 +325,9 @@ class _RequestDtoCopyWithImpl<$R, $Out>
   @override
   late final ClassMapperBase<RequestDto> $mapper =
       RequestDtoMapper.ensureInitialized();
+  @override
+  VettingFeedbackDtoCopyWith<$R, VettingFeedbackDto, VettingFeedbackDto>?
+  get vetting => $value.vetting?.copyWith.$chain((v) => call(vetting: v));
   @override
   UserDtoCopyWith<$R, UserDto, UserDto>? get user =>
       $value.user?.copyWith.$chain((v) => call(user: v));
@@ -328,6 +343,7 @@ class _RequestDtoCopyWithImpl<$R, $Out>
     Object? lng = $none,
     DateTime? createdAt,
     DateTime? updatedAt,
+    Object? vetting = $none,
     Object? user = $none,
   }) => $apply(
     FieldCopyWithData({
@@ -341,6 +357,7 @@ class _RequestDtoCopyWithImpl<$R, $Out>
       if (lng != $none) #lng: lng,
       if (createdAt != null) #createdAt: createdAt,
       if (updatedAt != null) #updatedAt: updatedAt,
+      if (vetting != $none) #vetting: vetting,
       if (user != $none) #user: user,
     }),
   );
@@ -356,6 +373,7 @@ class _RequestDtoCopyWithImpl<$R, $Out>
     lng: data.get(#lng, or: $value.lng),
     createdAt: data.get(#createdAt, or: $value.createdAt),
     updatedAt: data.get(#updatedAt, or: $value.updatedAt),
+    vetting: data.get(#vetting, or: $value.vetting),
     user: data.get(#user, or: $value.user),
   );
 

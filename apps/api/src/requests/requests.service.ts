@@ -1,17 +1,16 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { RequestCreatedEvent } from './events/request-created.event';
 import { PrismaService } from '../infrastructure/persistence/prisma/prisma.service';
 import { CreateRequestDto } from './dto/create-request.dto';
 import { RequestStatus } from '@prisma/client';
 import { toPublicRequest } from '../common/public-serializers';
 import { approximateLocation } from '../common/geo-hash';
+import { VettingService } from '../vetting/vetting.service';
 
 @Injectable()
 export class RequestsService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly eventEmitter: EventEmitter2,
+    private readonly vetting: VettingService,
   ) {}
 
   async create(userId: string, dto: CreateRequestDto) {
@@ -43,12 +42,24 @@ export class RequestsService {
       },
     });
 
-    this.eventEmitter.emit(
-      'request.created',
-      new RequestCreatedEvent(request.id, request.title, request.description),
+    const vetting = await this.vetting.vetRequest(
+      request.id,
+      `${dto.title} ${dto.description}`,
     );
+    const updated = await this.prisma.request.findUnique({
+      where: { id: request.id },
+    });
 
-    return toPublicRequest(request);
+    return {
+      ...toPublicRequest(updated ?? request),
+      vetting: {
+        triggered_rule: vetting.triggeredRule,
+        reason_code: vetting.reasonCode,
+        user_message: vetting.userMessage,
+        show_helplines: vetting.showHelplines,
+        helplines: vetting.helplines,
+      },
+    };
   }
 
   async findAll() {

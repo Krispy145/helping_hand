@@ -50,11 +50,15 @@ class RequestNotifier extends AsyncNotifier<void> {
   @override
   Future<void> build() async {}
 
-  Future<void> createRequest(CreateRequestDto dto) async {
+  Future<RequestDto?> createRequest(CreateRequestDto dto) async {
     state = const AsyncLoading();
+    RequestDto? created;
     state = await AsyncValue.guard(() async {
-      await ref.read(requestRepositoryProvider).createRequest(dto);
-      await ref.read(nearbyRequestsProvider.notifier).refresh();
+      created = await ref.read(requestRepositoryProvider).createRequest(dto);
+      if (created!.status == RequestStatusDto.APPROVED) {
+        await ref.read(nearbyRequestsProvider.notifier).refresh();
+      }
     });
+    return created;
   }
 }

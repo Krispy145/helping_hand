@@ -1,5 +1,6 @@
 import 'package:dart_mappable/dart_mappable.dart';
 import '../user/user_dto.dart';
+import '../vetting/vetting_dto.dart';
 
 part 'request_dto.mapper.dart';
 
@@ -33,6 +34,7 @@ class RequestDto with RequestDtoMappable {
   final double? lng;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final VettingFeedbackDto? vetting;
   final UserDto? user; // Optional for list views where user might be separate calls, but good to have.
 
   const RequestDto({
@@ -46,6 +48,7 @@ class RequestDto with RequestDtoMappable {
     this.lng,
     required this.createdAt,
     required this.updatedAt,
+    this.vetting,
     this.user,
   });
 }

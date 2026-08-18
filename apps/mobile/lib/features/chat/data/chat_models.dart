@@ -121,6 +121,10 @@ class OfferAvailability {
         return 'Someone is already helping with this request.';
       case 'own_request':
         return 'You cannot offer help on your own request.';
+      case 'unverified':
+        return 'Verify your identity before offering help.';
+      case 'underage':
+        return 'Helping Hand is for adults 18 and over.';
       case 'not_open':
         return 'This request is no longer open for help.';
       default:

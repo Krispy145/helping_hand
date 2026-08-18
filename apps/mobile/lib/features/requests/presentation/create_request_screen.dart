@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:map/map.dart';
 import 'package:models/models.dart';
 
+import '../../verification/presentation/verification_gate.dart';
 import '../providers/request_provider.dart';
 
 class CreateRequestScreen extends ConsumerStatefulWidget {
@@ -44,6 +45,7 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    if (!await ensureVerifiedAdult(context, ref)) return;
 
     final location = await _resolveLocation();
     if (location == null) {

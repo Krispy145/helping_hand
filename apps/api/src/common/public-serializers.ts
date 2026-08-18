@@ -3,6 +3,9 @@ type PublicUserSource = {
   email: string;
   name?: string | null;
   role: string;
+  verificationStatus?: string | null;
+  verifiedAt?: Date | null;
+  verificationFailureReason?: string | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -32,6 +35,11 @@ export function toPublicUser(
     email: options?.includeEmail ? user.email : '',
     name: user.name,
     role: user.role,
+    verification_status: user.verificationStatus ?? 'UNVERIFIED',
+    verified_at: options?.includeEmail ? (user.verifiedAt ?? null) : undefined,
+    verification_failure_reason: options?.includeEmail
+      ? (user.verificationFailureReason ?? null)
+      : undefined,
     created_at: user.createdAt,
     updated_at: user.updatedAt,
   };

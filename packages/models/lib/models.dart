@@ -9,3 +9,4 @@ export 'src/models_base.dart';
 export 'src/reports/report_dto.dart';
 export 'src/requests/request_dto.dart';
 export 'src/user/user_dto.dart';
+export 'src/verification/verification_dto.dart';

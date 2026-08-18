@@ -17,6 +17,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { VerifiedAdultGuard } from '../verification/verified-adult.guard';
 
 @ApiTags('requests')
 @ApiBearerAuth()
@@ -25,7 +26,7 @@ export class RequestsController {
   constructor(private readonly requestsService: RequestsService) {}
 
   @Post()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), VerifiedAdultGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a help request' })
   @ApiResponse({ status: 201, description: 'Request created successfully' })

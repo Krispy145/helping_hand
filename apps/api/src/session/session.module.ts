@@ -3,9 +3,10 @@ import { SessionService } from './session.service';
 import { SessionController } from './session.controller';
 import { SessionGateway } from './session.gateway';
 import { PrismaService } from '../infrastructure/persistence/prisma/prisma.service';
+import { VerificationModule } from '../verification/verification.module';
 
 @Module({
-  imports: [],
+  imports: [VerificationModule],
   controllers: [SessionController],
   providers: [SessionService, SessionGateway, PrismaService],
   exports: [SessionService],

@@ -15,6 +15,7 @@ import 'features/reports/presentation/report_entry.dart';
 import 'features/reports/presentation/report_screen.dart';
 import 'features/requests/presentation/create_request_screen.dart';
 import 'features/settings/presentation/settings_screen.dart';
+import 'features/verification/presentation/verification_screen.dart';
 
 class AppRoutes {
   static const home = '/';
@@ -24,6 +25,7 @@ class AppRoutes {
   static const session = '/session/:id';
   static const onboarding = '/onboarding';
   static const settings = '/settings';
+  static const verification = '/verification';
   static const chats = '/chats';
   static const report = '/report';
 }
@@ -90,6 +92,7 @@ class AppRouter {
           builder: (context, state) => ChatScreen(sessionId: state.pathParameters['id']!),
         ),
         GoRoute(path: AppRoutes.settings, builder: (context, state) => const SettingsScreen()),
+        GoRoute(path: AppRoutes.verification, builder: (context, state) => const VerificationScreen()),
         GoRoute(path: AppRoutes.chats, builder: (context, state) => const ChatsScreen()),
         GoRoute(
           path: AppRoutes.report,

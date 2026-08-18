@@ -10,6 +10,11 @@ export class User {
   password?: string;
   name?: string | null;
   role: UserRole;
+  verificationStatus?: string;
+  verificationProvider?: string | null;
+  verificationProviderRef?: string | null;
+  verifiedAt?: Date | null;
+  verificationFailureReason?: string | null;
   createdAt: Date;
   updatedAt: Date;
 

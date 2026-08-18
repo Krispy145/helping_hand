@@ -58,6 +58,116 @@ extension UserRoleDtoMapperExtension on UserRoleDto {
   }
 }
 
+class VerificationStatusDtoMapper extends EnumMapper<VerificationStatusDto> {
+  VerificationStatusDtoMapper._();
+
+  static VerificationStatusDtoMapper? _instance;
+  static VerificationStatusDtoMapper ensureInitialized() {
+    if (_instance == null) {
+      MapperContainer.globals.use(_instance = VerificationStatusDtoMapper._());
+    }
+    return _instance!;
+  }
+
+  static VerificationStatusDto fromValue(dynamic value) {
+    ensureInitialized();
+    return MapperContainer.globals.fromValue(value);
+  }
+
+  @override
+  VerificationStatusDto decode(dynamic value) {
+    switch (value) {
+      case r'UNVERIFIED':
+        return VerificationStatusDto.UNVERIFIED;
+      case r'PENDING':
+        return VerificationStatusDto.PENDING;
+      case r'VERIFIED':
+        return VerificationStatusDto.VERIFIED;
+      case r'FAILED':
+        return VerificationStatusDto.FAILED;
+      default:
+        throw MapperException.unknownEnumValue(value);
+    }
+  }
+
+  @override
+  dynamic encode(VerificationStatusDto self) {
+    switch (self) {
+      case VerificationStatusDto.UNVERIFIED:
+        return r'UNVERIFIED';
+      case VerificationStatusDto.PENDING:
+        return r'PENDING';
+      case VerificationStatusDto.VERIFIED:
+        return r'VERIFIED';
+      case VerificationStatusDto.FAILED:
+        return r'FAILED';
+    }
+  }
+}
+
+extension VerificationStatusDtoMapperExtension on VerificationStatusDto {
+  String toValue() {
+    VerificationStatusDtoMapper.ensureInitialized();
+    return MapperContainer.globals.toValue<VerificationStatusDto>(this)
+        as String;
+  }
+}
+
+class VerificationFailureReasonDtoMapper
+    extends EnumMapper<VerificationFailureReasonDto> {
+  VerificationFailureReasonDtoMapper._();
+
+  static VerificationFailureReasonDtoMapper? _instance;
+  static VerificationFailureReasonDtoMapper ensureInitialized() {
+    if (_instance == null) {
+      MapperContainer.globals.use(
+        _instance = VerificationFailureReasonDtoMapper._(),
+      );
+    }
+    return _instance!;
+  }
+
+  static VerificationFailureReasonDto fromValue(dynamic value) {
+    ensureInitialized();
+    return MapperContainer.globals.fromValue(value);
+  }
+
+  @override
+  VerificationFailureReasonDto decode(dynamic value) {
+    switch (value) {
+      case r'UNDERAGE':
+        return VerificationFailureReasonDto.UNDERAGE;
+      case r'PROVIDER_REJECTED':
+        return VerificationFailureReasonDto.PROVIDER_REJECTED;
+      case r'EXPIRED':
+        return VerificationFailureReasonDto.EXPIRED;
+      default:
+        throw MapperException.unknownEnumValue(value);
+    }
+  }
+
+  @override
+  dynamic encode(VerificationFailureReasonDto self) {
+    switch (self) {
+      case VerificationFailureReasonDto.UNDERAGE:
+        return r'UNDERAGE';
+      case VerificationFailureReasonDto.PROVIDER_REJECTED:
+        return r'PROVIDER_REJECTED';
+      case VerificationFailureReasonDto.EXPIRED:
+        return r'EXPIRED';
+    }
+  }
+}
+
+extension VerificationFailureReasonDtoMapperExtension
+    on VerificationFailureReasonDto {
+  String toValue() {
+    VerificationFailureReasonDtoMapper.ensureInitialized();
+    return MapperContainer.globals.toValue<VerificationFailureReasonDto>(this)
+        as String;
+  }
+}
+
 class UserDtoMapper extends ClassMapperBase<UserDto> {
   UserDtoMapper._();
 
@@ -66,6 +176,8 @@ class UserDtoMapper extends ClassMapperBase<UserDto> {
     if (_instance == null) {
       MapperContainer.globals.use(_instance = UserDtoMapper._());
       UserRoleDtoMapper.ensureInitialized();
+      VerificationStatusDtoMapper.ensureInitialized();
+      VerificationFailureReasonDtoMapper.ensureInitialized();
     }
     return _instance!;
   }
@@ -85,6 +197,32 @@ class UserDtoMapper extends ClassMapperBase<UserDto> {
   );
   static UserRoleDto _$role(UserDto v) => v.role;
   static const Field<UserDto, UserRoleDto> _f$role = Field('role', _$role);
+  static VerificationStatusDto _$verificationStatus(UserDto v) =>
+      v.verificationStatus;
+  static const Field<UserDto, VerificationStatusDto> _f$verificationStatus =
+      Field(
+        'verificationStatus',
+        _$verificationStatus,
+        key: r'verification_status',
+        opt: true,
+        def: VerificationStatusDto.UNVERIFIED,
+      );
+  static DateTime? _$verifiedAt(UserDto v) => v.verifiedAt;
+  static const Field<UserDto, DateTime> _f$verifiedAt = Field(
+    'verifiedAt',
+    _$verifiedAt,
+    key: r'verified_at',
+    opt: true,
+  );
+  static VerificationFailureReasonDto? _$verificationFailureReason(UserDto v) =>
+      v.verificationFailureReason;
+  static const Field<UserDto, VerificationFailureReasonDto>
+  _f$verificationFailureReason = Field(
+    'verificationFailureReason',
+    _$verificationFailureReason,
+    key: r'verification_failure_reason',
+    opt: true,
+  );
   static DateTime _$createdAt(UserDto v) => v.createdAt;
   static const Field<UserDto, DateTime> _f$createdAt = Field(
     'createdAt',
@@ -104,6 +242,9 @@ class UserDtoMapper extends ClassMapperBase<UserDto> {
     #email: _f$email,
     #name: _f$name,
     #role: _f$role,
+    #verificationStatus: _f$verificationStatus,
+    #verifiedAt: _f$verifiedAt,
+    #verificationFailureReason: _f$verificationFailureReason,
     #createdAt: _f$createdAt,
     #updatedAt: _f$updatedAt,
   };
@@ -114,6 +255,9 @@ class UserDtoMapper extends ClassMapperBase<UserDto> {
       email: data.dec(_f$email),
       name: data.dec(_f$name),
       role: data.dec(_f$role),
+      verificationStatus: data.dec(_f$verificationStatus),
+      verifiedAt: data.dec(_f$verifiedAt),
+      verificationFailureReason: data.dec(_f$verificationFailureReason),
       createdAt: data.dec(_f$createdAt),
       updatedAt: data.dec(_f$updatedAt),
     );
@@ -181,6 +325,9 @@ abstract class UserDtoCopyWith<$R, $In extends UserDto, $Out>
     String? email,
     String? name,
     UserRoleDto? role,
+    VerificationStatusDto? verificationStatus,
+    DateTime? verifiedAt,
+    VerificationFailureReasonDto? verificationFailureReason,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -201,6 +348,9 @@ class _UserDtoCopyWithImpl<$R, $Out>
     String? email,
     Object? name = $none,
     UserRoleDto? role,
+    VerificationStatusDto? verificationStatus,
+    Object? verifiedAt = $none,
+    Object? verificationFailureReason = $none,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => $apply(
@@ -209,6 +359,10 @@ class _UserDtoCopyWithImpl<$R, $Out>
       if (email != null) #email: email,
       if (name != $none) #name: name,
       if (role != null) #role: role,
+      if (verificationStatus != null) #verificationStatus: verificationStatus,
+      if (verifiedAt != $none) #verifiedAt: verifiedAt,
+      if (verificationFailureReason != $none)
+        #verificationFailureReason: verificationFailureReason,
       if (createdAt != null) #createdAt: createdAt,
       if (updatedAt != null) #updatedAt: updatedAt,
     }),
@@ -219,6 +373,15 @@ class _UserDtoCopyWithImpl<$R, $Out>
     email: data.get(#email, or: $value.email),
     name: data.get(#name, or: $value.name),
     role: data.get(#role, or: $value.role),
+    verificationStatus: data.get(
+      #verificationStatus,
+      or: $value.verificationStatus,
+    ),
+    verifiedAt: data.get(#verifiedAt, or: $value.verifiedAt),
+    verificationFailureReason: data.get(
+      #verificationFailureReason,
+      or: $value.verificationFailureReason,
+    ),
     createdAt: data.get(#createdAt, or: $value.createdAt),
     updatedAt: data.get(#updatedAt, or: $value.updatedAt),
   );

@@ -9,6 +9,7 @@ import { VettingModule } from './vetting/vetting.module';
 import { SessionModule } from './session/session.module';
 import { ReportsModule } from './reports/reports.module';
 import { VerificationModule } from './verification/verification.module';
+import { PulseModule } from './pulse/pulse.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
@@ -22,6 +23,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     SessionModule,
     ReportsModule,
     VerificationModule,
+    PulseModule,
   ],
   controllers: [AppController],
   providers: [AppService],

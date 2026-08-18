@@ -16,5 +16,10 @@ class ApiEndpoints {
   static const String verificationStatus = '/verification/status';
   static const String verificationStart = '/verification/start';
   static const String verificationStubComplete = '/verification/stub-complete';
+  static const String publicPulseSummary = '/public/pulse/summary';
+  static const String pulseQueue = '/pulse/queue';
+  static String requestAppeal(String id) => '/requests/$id/appeal';
+  static String pulseUphold(String id) => '/pulse/appeals/$id/uphold';
+  static String pulseOverturn(String id) => '/pulse/appeals/$id/overturn';
   static const String chatSocket = '/chat';
 }

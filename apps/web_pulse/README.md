@@ -1,16 +1,13 @@
-# web_pulse
+# Humanity Pulse
 
-A new Flutter project.
+Flutter web dashboard for Helping Hand staff.
 
-## Getting Started
+- Anonymous community totals (`GET /public/pulse/summary`)
+- Moderator login
+- Appeals queue to keep or overturn automated rejections
 
-This project is a starting point for a Flutter application.
+## Run
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+1. API on `http://localhost:3000` with the appeals migration applied
+2. Seed staff: `moderator@helpinghand.seed` / `password123`
+3. Launch **Web Pulse** (Chrome, port 8081) from `.vscode/launch.json`

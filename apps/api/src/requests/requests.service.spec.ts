@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return */
-import { BadRequestException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { RequestStatus, RequestUrgency } from '@prisma/client';
+import { RequestStatus, RequestUrgency, Prisma } from '@prisma/client';
 import { PrismaService } from '../infrastructure/persistence/prisma/prisma.service';
 import { VettingService } from '../vetting/vetting.service';
 import { RequestsService } from './requests.service';
@@ -14,6 +18,9 @@ describe('RequestsService', () => {
       create: jest.fn(),
       findMany: jest.fn(),
       findUnique: jest.fn(),
+    },
+    appeal: {
+      create: jest.fn(),
     },
     $queryRaw: jest.fn(),
   };
@@ -172,5 +179,66 @@ describe('RequestsService', () => {
       },
       orderBy: { createdAt: 'desc' },
     });
+  });
+
+  it('lets the owner appeal a rejected request once', async () => {
+    mockPrisma.request.findUnique.mockResolvedValue({
+      id: 'req-1',
+      userId: 'user-1',
+      status: RequestStatus.REJECTED,
+      title: 'Need groceries',
+      description: 'A few essentials.',
+      category: 'groceries',
+      urgency: RequestUrgency.MEDIUM,
+      approxLat: -33.92,
+      approxLng: 18.42,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    mockPrisma.appeal.create.mockResolvedValue({
+      id: 'appeal-1',
+      status: 'OPEN',
+    });
+
+    const result = await service.appeal('user-1', 'req-1');
+
+    expect(result.appeal_id).toBe('appeal-1');
+    expect(mockPrisma.appeal.create).toHaveBeenCalledWith({
+      data: {
+        requestId: 'req-1',
+        userId: 'user-1',
+        reason: 'I believe this was blocked by mistake.',
+      },
+    });
+  });
+
+  it('blocks appeals from anyone except the requester', async () => {
+    mockPrisma.request.findUnique.mockResolvedValue({
+      id: 'req-1',
+      userId: 'user-1',
+      status: RequestStatus.REJECTED,
+    });
+
+    await expect(service.appeal('user-2', 'req-1')).rejects.toBeInstanceOf(
+      ForbiddenException,
+    );
+  });
+
+  it('blocks a second appeal', async () => {
+    mockPrisma.request.findUnique.mockResolvedValue({
+      id: 'req-1',
+      userId: 'user-1',
+      status: RequestStatus.REJECTED,
+    });
+    mockPrisma.appeal.create.mockRejectedValue(
+      new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+        code: 'P2002',
+        clientVersion: '6.0.0',
+      }),
+    );
+
+    await expect(service.appeal('user-1', 'req-1')).rejects.toBeInstanceOf(
+      ConflictException,
+    );
   });
 });

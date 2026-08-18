@@ -1,7 +1,13 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { Prisma, RequestStatus } from '@prisma/client';
 import { PrismaService } from '../infrastructure/persistence/prisma/prisma.service';
 import { CreateRequestDto } from './dto/create-request.dto';
-import { RequestStatus } from '@prisma/client';
 import { toPublicRequest } from '../common/public-serializers';
 import { approximateLocation } from '../common/geo-hash';
 import { containsPii } from '../vetting/stage1-filters';
@@ -72,6 +78,44 @@ export class RequestsService {
       orderBy: { createdAt: 'desc' },
     });
     return requests.map((request) => toPublicRequest(request));
+  }
+
+  async appeal(userId: string, requestId: string, reason?: string) {
+    const request = await this.prisma.request.findUnique({
+      where: { id: requestId },
+    });
+    if (!request) {
+      throw new NotFoundException('Request not found');
+    }
+    if (request.userId !== userId) {
+      throw new ForbiddenException('You can only appeal your own request');
+    }
+    if (request.status !== RequestStatus.REJECTED) {
+      throw new BadRequestException('Only rejected requests can be appealed');
+    }
+
+    try {
+      const appeal = await this.prisma.appeal.create({
+        data: {
+          requestId,
+          userId,
+          reason: reason?.trim() || 'I believe this was blocked by mistake.',
+        },
+      });
+      return {
+        appeal_id: appeal.id,
+        status: appeal.status,
+        request: toPublicRequest(request),
+      };
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new ConflictException('This request has already been appealed');
+      }
+      throw error;
+    }
   }
 
   async findAllNearby(lat: number, lng: number, radiusInKm: number) {

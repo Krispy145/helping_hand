@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -7,6 +9,7 @@ import '../../../core/api_client_provider.dart';
 import '../../../core/listenable_notifier.dart';
 import '../../../core/shared_preferences_provider.dart';
 import '../../../core/storage/logging_secure_storage.dart';
+import '../../notifications/data/device_token_repository.dart';
 import '../../onboarding/application/onboarding_state_provider.dart';
 import '../data/auth_repository.dart';
 import '../presentation/widgets/profile_avatar.dart';
@@ -46,6 +49,7 @@ class AuthNotifier extends AsyncNotifier<UserDto?> with ListenableNotifier {
     try {
       final user = await _repository.getProfile();
       await _cacheUser(user);
+      unawaited(ref.read(deviceTokenRepositoryProvider).sync());
       return user;
     } on DioException catch (error) {
       if (error.response?.statusCode == 401) {
@@ -87,6 +91,7 @@ class AuthNotifier extends AsyncNotifier<UserDto?> with ListenableNotifier {
     state = await AsyncValue.guard(() async {
       final response = await _repository.login(LoginRequestDto(email: email, password: password));
       await _persistSession(response);
+      unawaited(ref.read(deviceTokenRepositoryProvider).sync());
       return response.user;
     });
   }
@@ -96,6 +101,7 @@ class AuthNotifier extends AsyncNotifier<UserDto?> with ListenableNotifier {
     state = await AsyncValue.guard(() async {
       final response = await _repository.register(RegisterRequestDto(email: email, password: password, name: name));
       await _persistSession(response);
+      unawaited(ref.read(deviceTokenRepositoryProvider).sync());
       return response.user;
     });
   }
@@ -107,6 +113,7 @@ class AuthNotifier extends AsyncNotifier<UserDto?> with ListenableNotifier {
   }
 
   Future<void> logout() async {
+    await ref.read(deviceTokenRepositoryProvider).clear();
     await _clearAuthStorage();
     final prefs = ref.read(sharedPreferencesProvider);
     await prefs.remove(ProfileAvatar.prefKey);

@@ -21,5 +21,6 @@ class ApiEndpoints {
   static String requestAppeal(String id) => '/requests/$id/appeal';
   static String pulseUphold(String id) => '/pulse/appeals/$id/uphold';
   static String pulseOverturn(String id) => '/pulse/appeals/$id/overturn';
+  static const String notificationDevices = '/notifications/devices';
   static const String chatSocket = '/chat';
 }

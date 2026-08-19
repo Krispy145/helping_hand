@@ -47,3 +47,4 @@ If you modify `packages/models`:
 ## 4. Testing
 -   **Backend**: `npm run test` (Unit) / `npm run test:e2e` (End-to-End).
 -   **Mobile**: `flutter test`.
+-   **Push (FCM)**: [Push Notifications](PUSH_NOTIFICATIONS.md). Local Android does **not** need Google Play Console. A real iPhone needs a paid Apple Developer Program membership for the APNs `.p8`.

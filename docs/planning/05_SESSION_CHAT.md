@@ -30,6 +30,6 @@ This feature enables real-time communication between a Helper and a Requestor af
 - **Separation of Concerns**: Repository handles REST (history/creation), Provider handles Socket (real-time).
 
 ## Next Steps (Future Phases)
-- [ ] Push Notifications for new messages when app is backgrounded.
+- [x] Push Notifications for new messages when app is backgrounded.
 - [ ] Message status (sent, delivered, read).
 - [ ] Typing indicators.

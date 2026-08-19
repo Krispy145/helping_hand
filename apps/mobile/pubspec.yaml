@@ -55,6 +55,8 @@ dependencies:
   shared_preferences: ^2.5.4
   image: ^4.7.2
   url_launcher: ^6.3.2
+  firebase_core: ^4.13.0
+  firebase_messaging: ^16.5.0
 
 dev_dependencies:
   flutter_test:

@@ -136,7 +136,7 @@ Shorebird determines *how* we build, and Fastlane determines *where* we deliver.
 ### Mobile Setup
 - [ ] Install `flutter_flavorizr` & run setup (Dev, Staging, Prod).
 - [ ] Initialize Shorebird (`shorebird init`).
-- [ ] Configure `go_router` + FCM.
+- [x] Configure `go_router` + FCM (device tokens + session alerts; native Firebase config still needed for delivery).
 
 ### Web Setup
 - [ ] Initialize Firebase Hosting.

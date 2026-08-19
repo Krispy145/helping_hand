@@ -7,9 +7,9 @@ Helping Hand uses a 3-tier CI/CD strategy comprising **Development**, **Staging*
 
 | Tier | Branch | Flavor ID | Firebase Project | API Tag |
 | :--- | :--- | :--- | :--- | :--- |
-| **Development** | `develop` | `dev` | `helping-hand-dev` | `dev-latest` |
-| **Staging** | `staging` | `stg` | `helping-hand-stg` | `staging-latest` |
-| **Production** | `main` | `prod` | `helping-hand-prod` | `prod-latest` |
+| **Development** | `develop` | `dev` | `helping-hand-dev-145` | `dev-latest` |
+| **Staging** | `staging` | `stg` | `helping-hand-stg-145` | `staging-latest` |
+| **Production** | `main` | `prod` | `helping-hand-prod-145` | `prod-latest` |
 
 ## Triggers
 
@@ -34,6 +34,17 @@ You can manually trigger a release from your terminal using the helper script:
 ```
 
 *Prerequisite: GitHub CLI (`gh`) must be installed and authenticated.*
+
+### Firebase projects
+Each environment is its own Firebase project (Android + iOS + Pulse Hosting). Create or refresh one from the **repo root**:
+
+```bash
+./scripts/setup_firebase.sh dev
+./scripts/setup_firebase.sh stg
+./scripts/setup_firebase.sh prod --yes
+```
+
+Do not run this from `apps/`. Hosting config lives at the monorepo root so Pulse, mobile, and the API Admin SDK share the same project.
 
 ## Infrastructure
 

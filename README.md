@@ -19,6 +19,7 @@
 ### 🚀 Getting Started
 -   [Developer Setup Guide](docs/guides/DEVELOPER_SETUP.md): How to build and run the project locally.
 -   [Authentication Guide](docs/guides/AUTHENTICATION.md): Understanding the auth flow.
+-   [Push Notifications](docs/guides/PUSH_NOTIFICATIONS.md): FCM setup and how to test session alerts.
 -   [CI/CD Manual](docs/guides/CI_CD_MANUAL.md): Deployment pipelines and release strategy.
 
 ### 📅 Planning & Roadmap

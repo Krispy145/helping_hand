@@ -32,6 +32,11 @@ export class FcmNotificationService
   ): Promise<void> {
     if (tokens.length === 0) return;
 
+    if (!admin.apps.length) {
+      this.logger.debug('Skipping push: Firebase Admin is not initialized');
+      return;
+    }
+
     try {
       const response = await admin.messaging().sendEachForMulticast({
         tokens,

@@ -57,6 +57,13 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ),
             ),
+            _HomeRoundIcon(
+              icon: Icons.health_and_safety_outlined,
+              color: context.error,
+              tooltip: 'Get urgent help',
+              onPressed: () => context.push(AppRoutes.urgentHelp),
+            ),
+            const SizedBox(width: 8),
             _HomeRoundIcon(icon: Icons.settings, onPressed: () => context.push(AppRoutes.settings)),
           ],
         ),
@@ -89,10 +96,17 @@ class HomeScreen extends ConsumerWidget {
 }
 
 class _HomeRoundIcon extends StatelessWidget {
-  const _HomeRoundIcon({required this.icon, required this.onPressed});
+  const _HomeRoundIcon({
+    required this.icon,
+    required this.onPressed,
+    this.color,
+    this.tooltip,
+  });
 
   final IconData icon;
   final VoidCallback onPressed;
+  final Color? color;
+  final String? tooltip;
 
   @override
   Widget build(BuildContext context) {
@@ -103,7 +117,8 @@ class _HomeRoundIcon extends StatelessWidget {
         padding: EdgeInsets.zero,
         constraints: const BoxConstraints.tightFor(width: 40, height: 40),
         iconSize: 22,
-        icon: Icon(icon, color: context.textPrimary),
+        tooltip: tooltip,
+        icon: Icon(icon, color: color ?? context.textPrimary),
         onPressed: onPressed,
       ),
     );

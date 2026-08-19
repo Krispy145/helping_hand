@@ -15,6 +15,7 @@ import 'features/reports/presentation/report_entry.dart';
 import 'features/reports/presentation/report_screen.dart';
 import 'features/requests/presentation/create_request_screen.dart';
 import 'features/settings/presentation/settings_screen.dart';
+import 'features/urgent_help/presentation/urgent_help_screen.dart';
 import 'features/verification/presentation/verification_screen.dart';
 
 class AppRoutes {
@@ -28,6 +29,7 @@ class AppRoutes {
   static const verification = '/verification';
   static const chats = '/chats';
   static const report = '/report';
+  static const urgentHelp = '/urgent-help';
 }
 
 class AppRouter {
@@ -94,6 +96,7 @@ class AppRouter {
         GoRoute(path: AppRoutes.settings, builder: (context, state) => const SettingsScreen()),
         GoRoute(path: AppRoutes.verification, builder: (context, state) => const VerificationScreen()),
         GoRoute(path: AppRoutes.chats, builder: (context, state) => const ChatsScreen()),
+        GoRoute(path: AppRoutes.urgentHelp, builder: (context, state) => const UrgentHelpScreen()),
         GoRoute(
           path: AppRoutes.report,
           builder: (context, state) {

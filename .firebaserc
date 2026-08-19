@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "helping-hand-group"
+    "dev": "helping-hand-dev-145",
+    "default": "helping-hand-dev-145"
   }
 }

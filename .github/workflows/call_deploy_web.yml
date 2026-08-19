@@ -35,6 +35,6 @@ jobs:
           repoToken: "${{ secrets.GITHUB_TOKEN }}"
           firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}"  # Needs to be set in repo secrets
           channelId: live
-          projectId: "helping-hand-${{ inputs.environment }}" # Assumption on project ID naming
+          projectId: "helping-hand-${{ inputs.environment }}" # IDs live in .firebaserc (dev is helping-hand-dev-145)
         env:
           FIREBASE_CLI_PREVIEWS: hostingchannels

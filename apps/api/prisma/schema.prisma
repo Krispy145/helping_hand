@@ -53,6 +53,7 @@ model User {
   safetyIncidents SafetyIncident[]
   appealsFiled    Appeal[] @relation("AppealsFiled")
   appealsReviewed Appeal[] @relation("AppealsReviewed")
+  deviceTokens    DeviceToken[]
 }
 
 enum SessionStatus {
@@ -229,4 +230,16 @@ model Appeal {
   updatedAt  DateTime     @updatedAt
 
   @@index([status, createdAt])
+}
+
+model DeviceToken {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  platform  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }

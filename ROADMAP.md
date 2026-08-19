@@ -75,6 +75,6 @@ This document tracks the high-level progress of the Helping Hand project.
 - [ ] Session Management Polish.
 
 ### **Phase 6: Polish & Beta (v1.0.0)**
-- [ ] Push Notifications.
+- [x] Push Notifications.
 - [ ] Shorebird OTA.
 

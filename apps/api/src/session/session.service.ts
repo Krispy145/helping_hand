@@ -14,13 +14,18 @@ import {
   VerificationStatus,
 } from '@prisma/client';
 
+import { NotificationsService } from '../notifications/notifications.service';
+
 type SessionWithRequest = Prisma.SessionGetPayload<{
   include: { request: true };
 }>;
 
 @Injectable()
 export class SessionService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+  ) {}
 
   async checkOfferAvailability(requestId: string, helperId: string) {
     const helper = await this.prisma.user.findUnique({
@@ -53,7 +58,7 @@ export class SessionService {
 
   async createSession(requestId: string, helperId: string) {
     try {
-      const sessionId = await this.prisma.$transaction(async (tx) => {
+      const created = await this.prisma.$transaction(async (tx) => {
         await tx.$queryRaw`SELECT id FROM "Request" WHERE id = ${requestId} FOR UPDATE`;
 
         const request = await tx.request.findUnique({
@@ -64,7 +69,7 @@ export class SessionService {
 
         const availability = this.offerAvailabilityFor(request, helperId);
         if (availability.sessionId) {
-          return availability.sessionId;
+          return { sessionId: availability.sessionId, isNew: false };
         }
         if (!availability.open) {
           if (availability.busy) {
@@ -79,7 +84,7 @@ export class SessionService {
         const helper = await tx.user.findUnique({ where: { id: helperId } });
         if (!helper) throw new NotFoundException('Helper not found');
 
-        const created = await tx.session.create({
+        const session = await tx.session.create({
           data: {
             requestId,
             helperId,
@@ -88,7 +93,7 @@ export class SessionService {
         });
         await tx.message.create({
           data: {
-            sessionId: created.id,
+            sessionId: session.id,
             senderId: request.userId,
             content: this.buildRequestIntro(request),
           },
@@ -97,16 +102,22 @@ export class SessionService {
           where: { id: requestId },
           data: { status: RequestStatus.IN_PROGRESS },
         });
-        return created.id;
+        return { sessionId: session.id, isNew: true };
       });
 
       const request = await this.prisma.request.findUnique({
         where: { id: requestId },
       });
       if (request) {
-        await this.ensureRequestIntroMessage(sessionId, request);
+        await this.ensureRequestIntroMessage(created.sessionId, request);
+        if (created.isNew) {
+          void this.notifications.notifyUser(request.userId, 'help_offered', {
+            sessionId: created.sessionId,
+            requestId,
+          });
+        }
       }
-      return this.getSession(sessionId, helperId);
+      return this.getSession(created.sessionId, helperId);
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -166,13 +177,19 @@ export class SessionService {
       throw new ForbiddenException('Session is not active');
     this.assertParticipant(session, senderId);
 
-    return this.prisma.message.create({
+    const message = await this.prisma.message.create({
       data: {
         sessionId,
         senderId,
         content,
       },
     });
+    const recipientId = this.otherParticipantId(session, senderId);
+    void this.notifications.notifyUser(recipientId, 'new_message', {
+      sessionId,
+      requestId: session.requestId,
+    });
+    return message;
   }
 
   async getMessages(sessionId: string, userId: string): Promise<Message[]> {
@@ -210,6 +227,12 @@ export class SessionService {
       });
     });
 
+    void this.notifications.notifyUser(
+      this.otherParticipantId(session, userId),
+      'assist_ended',
+      { sessionId, requestId: session.requestId },
+    );
+
     return { status: 'CANCELLED', requestStatus: RequestStatus.APPROVED };
   }
 
@@ -234,6 +257,12 @@ export class SessionService {
         data: { status: RequestStatus.COMPLETED },
       });
     });
+
+    void this.notifications.notifyUser(
+      this.otherParticipantId(session, userId),
+      'assist_completed',
+      { sessionId, requestId: session.requestId },
+    );
 
     return this.getSession(sessionId, userId);
   }
@@ -317,6 +346,12 @@ export class SessionService {
     }
 
     return { open: true, busy: false, reason: 'open' as const };
+  }
+
+  private otherParticipantId(session: SessionWithRequest, userId: string) {
+    return session.helperId === userId
+      ? session.request.userId
+      : session.helperId;
   }
 
   private assertParticipant(session: SessionWithRequest, userId: string) {

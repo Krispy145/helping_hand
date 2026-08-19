@@ -6,10 +6,12 @@ import {
   UseGuards,
   Request,
   Query,
+  Param,
   BadRequestException,
 } from '@nestjs/common';
 import { RequestsService } from './requests.service';
 import { CreateRequestDto } from './dto/create-request.dto';
+import { CreateAppealDto } from './dto/create-appeal.dto';
 import {
   ApiTags,
   ApiOperation,
@@ -69,6 +71,17 @@ export class RequestsController {
     }
 
     throw new BadRequestException('Provide a bounding box or lat/lng');
+  }
+
+  @Post(':id/appeal')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiOperation({ summary: 'Appeal a rejected request once' })
+  appeal(
+    @Request() req: { user: { userId: string } },
+    @Param('id') id: string,
+    @Body() dto?: CreateAppealDto,
+  ) {
+    return this.requestsService.appeal(req.user.userId, id, dto?.reason);
   }
 
   @Get()

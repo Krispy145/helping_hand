@@ -80,3 +80,33 @@ jobs:
 
       - name: Test
         run: flutter test
+
+  pulse-check:
+    name: "Web Pulse (Apps/Web Pulse)"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./apps/web_pulse
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Shared Packages
+        run: |
+          cd ../../packages/models && flutter pub get
+          cd ../ui && flutter pub get
+          cd ../utils && flutter pub get
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Test
+        run: flutter test

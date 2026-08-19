@@ -1,12 +1,12 @@
 {
-    "name": "web_pulse",
-    "short_name": "web_pulse",
+    "name": "Humanity Pulse",
+    "short_name": "Pulse",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
+    "description": "Anonymous community trends and vetting appeals for Helping Hand.",
+    "orientation": "any",
     "prefer_related_applications": false,
     "icons": [
         {

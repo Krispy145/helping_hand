@@ -1,5 +1,12 @@
 import 'dotenv/config';
-import { PrismaClient, RequestStatus, RequestUrgency, Role, VerificationStatus } from '@prisma/client';
+import {
+  PrismaClient,
+  RequestStatus,
+  RequestUrgency,
+  Role,
+  SafetyIncidentSource,
+  VerificationStatus,
+} from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { approximateLocation } from '../src/common/geo-hash';
 
@@ -19,33 +26,141 @@ type City = {
 };
 
 const CITIES: City[] = [
-  { name: 'Johannesburg', lat: -26.2041, lng: 28.0473, radiusKm: 8, weight: 0.4 },
+  {
+    name: 'Johannesburg',
+    lat: -26.2041,
+    lng: 28.0473,
+    radiusKm: 8,
+    weight: 0.4,
+  },
   { name: 'Cape Town', lat: -33.9249, lng: 18.4241, radiusKm: 8, weight: 0.4 },
-  { name: 'Plettenberg Bay', lat: -34.0527, lng: 23.3716, radiusKm: 5, weight: 0.2 },
+  {
+    name: 'Plettenberg Bay',
+    lat: -34.0527,
+    lng: 23.3716,
+    radiusKm: 5,
+    weight: 0.2,
+  },
 ];
 
 const DISPLAY_NAMES = [
-  'Amara', 'Thabo', 'Lerato', 'Sipho', 'Naledi', 'Ayesha', 'Zanele', 'Karabo',
-  'Palesa', 'Mandla', 'Nomsa', 'Kabelo', 'Andile', 'Tshepo', 'Sibusiso',
-  'Cedar', 'River', 'Indigo', 'Moss', 'Harbor', 'Quill', 'Marigold', 'Pebble',
+  'Amara',
+  'Thabo',
+  'Lerato',
+  'Sipho',
+  'Naledi',
+  'Ayesha',
+  'Zanele',
+  'Karabo',
+  'Palesa',
+  'Mandla',
+  'Nomsa',
+  'Kabelo',
+  'Andile',
+  'Tshepo',
+  'Sibusiso',
+  'Cedar',
+  'River',
+  'Indigo',
+  'Moss',
+  'Harbor',
+  'Quill',
+  'Marigold',
+  'Pebble',
 ];
 
-const REQUEST_TEMPLATES: Array<{ title: string; description: string; category: string }> = [
-  { title: 'Need a grocery run this afternoon', description: 'Could use a hand picking up a few essentials from a nearby shop. Happy to meet in a public place.', category: 'groceries' },
-  { title: 'Help carrying boxes upstairs', description: 'A few light boxes to move up one flight of stairs. Should take about 20 minutes.', category: 'moving' },
-  { title: 'Walk a dog this evening', description: 'Looking for someone nearby to take a short neighbourhood walk with a friendly dog.', category: 'pet-care' },
-  { title: 'Phone setup help', description: 'Need someone patient to help set up a new phone and explain the basics in a public cafe.', category: 'tech-help' },
-  { title: 'Company for a walk to the clinic', description: 'Would appreciate a friendly person to walk with me to a nearby clinic and back.', category: 'companionship' },
-  { title: 'Need a lift to the library', description: 'Looking for a short ride to the public library this weekend.', category: 'transport' },
-  { title: 'Help reading a municipal letter', description: 'I received a letter I am struggling to understand. Would like someone to go through it with me in a public place.', category: 'language' },
-  { title: 'Tutor a teen in maths', description: 'Looking for an hour of high-school maths help this week, in a public cafe.', category: 'tutoring' },
-  { title: 'Collect a parcel nearby', description: 'Cannot get to the collection point today. Details can stay in-app.', category: 'errands' },
-  { title: 'Help hanging two shelves', description: 'Need an extra pair of hands and a spirit level for about 30 minutes.', category: 'household' },
-  { title: 'Translate a short form', description: 'Need help filling in a short form at a public office.', category: 'language' },
-  { title: 'Someone to sit with at the park', description: 'Would like company for a short sit in a public park.', category: 'companionship' },
-  { title: 'Help choosing a bus route', description: 'New in the area and need help figuring out a public-transport route.', category: 'transport' },
-  { title: 'Pick up a prescription nearby', description: 'Unable to get to the pharmacy before it closes. Can share details in chat.', category: 'errands' },
-  { title: 'Show me email on a tablet', description: 'Need a calm walkthrough of sending and reading email on a tablet.', category: 'tech-help' },
+const REQUEST_TEMPLATES: Array<{
+  title: string;
+  description: string;
+  category: string;
+}> = [
+  {
+    title: 'Need a grocery run this afternoon',
+    description:
+      'Could use a hand picking up a few essentials from a nearby shop. Happy to meet in a public place.',
+    category: 'groceries',
+  },
+  {
+    title: 'Help carrying boxes upstairs',
+    description:
+      'A few light boxes to move up one flight of stairs. Should take about 20 minutes.',
+    category: 'moving',
+  },
+  {
+    title: 'Walk a dog this evening',
+    description:
+      'Looking for someone nearby to take a short neighbourhood walk with a friendly dog.',
+    category: 'pet-care',
+  },
+  {
+    title: 'Phone setup help',
+    description:
+      'Need someone patient to help set up a new phone and explain the basics in a public cafe.',
+    category: 'tech-help',
+  },
+  {
+    title: 'Company for a walk to the clinic',
+    description:
+      'Would appreciate a friendly person to walk with me to a nearby clinic and back.',
+    category: 'companionship',
+  },
+  {
+    title: 'Need a lift to the library',
+    description: 'Looking for a short ride to the public library this weekend.',
+    category: 'transport',
+  },
+  {
+    title: 'Help reading a municipal letter',
+    description:
+      'I received a letter I am struggling to understand. Would like someone to go through it with me in a public place.',
+    category: 'language',
+  },
+  {
+    title: 'Tutor a teen in maths',
+    description:
+      'Looking for an hour of high-school maths help this week, in a public cafe.',
+    category: 'tutoring',
+  },
+  {
+    title: 'Collect a parcel nearby',
+    description:
+      'Cannot get to the collection point today. Details can stay in-app.',
+    category: 'errands',
+  },
+  {
+    title: 'Help hanging two shelves',
+    description:
+      'Need an extra pair of hands and a spirit level for about 30 minutes.',
+    category: 'household',
+  },
+  {
+    title: 'Translate a short form',
+    description: 'Need help filling in a short form at a public office.',
+    category: 'language',
+  },
+  {
+    title: 'Someone to sit with at the park',
+    description: 'Would like company for a short sit in a public park.',
+    category: 'companionship',
+  },
+  {
+    title: 'Help choosing a bus route',
+    description:
+      'New in the area and need help figuring out a public-transport route.',
+    category: 'transport',
+  },
+  {
+    title: 'Pick up a prescription nearby',
+    description:
+      'Unable to get to the pharmacy before it closes. Can share details in chat.',
+    category: 'errands',
+  },
+  {
+    title: 'Show me email on a tablet',
+    description:
+      'Need a calm walkthrough of sending and reading email on a tablet.',
+    category: 'tech-help',
+  },
 ];
 
 function pick<T>(items: T[]): T {
@@ -67,7 +182,8 @@ function offsetAround(city: City): { lat: number; lng: number } {
   const bearing = Math.random() * Math.PI * 2;
   const latOffset = (distanceKm * Math.cos(bearing)) / 111;
   const lngOffset =
-    (distanceKm * Math.sin(bearing)) / (111 * Math.cos((city.lat * Math.PI) / 180));
+    (distanceKm * Math.sin(bearing)) /
+    (111 * Math.cos((city.lat * Math.PI) / 180));
   return { lat: city.lat + latOffset, lng: city.lng + lngOffset };
 }
 
@@ -101,10 +217,53 @@ async function main() {
   console.log('Seeding anonymous Helping Hand dev data...');
 
   await prisma.message.deleteMany({
-    where: { sender: { email: { endsWith: `@${SEED_EMAIL_DOMAIN}` } } },
+    where: {
+      OR: [
+        { sender: { email: { endsWith: `@${SEED_EMAIL_DOMAIN}` } } },
+        {
+          session: {
+            helper: { email: { endsWith: `@${SEED_EMAIL_DOMAIN}` } },
+          },
+        },
+        {
+          session: {
+            request: { user: { email: { endsWith: `@${SEED_EMAIL_DOMAIN}` } } },
+          },
+        },
+      ],
+    },
+  });
+  await prisma.appeal.deleteMany({
+    where: {
+      OR: [
+        { user: { email: { endsWith: `@${SEED_EMAIL_DOMAIN}` } } },
+        { request: { user: { email: { endsWith: `@${SEED_EMAIL_DOMAIN}` } } } },
+      ],
+    },
+  });
+  await prisma.safetyIncident.deleteMany({
+    where: {
+      OR: [
+        { user: { email: { endsWith: `@${SEED_EMAIL_DOMAIN}` } } },
+        { request: { user: { email: { endsWith: `@${SEED_EMAIL_DOMAIN}` } } } },
+      ],
+    },
+  });
+  await prisma.report.deleteMany({
+    where: {
+      OR: [
+        { reporter: { email: { endsWith: `@${SEED_EMAIL_DOMAIN}` } } },
+        { request: { user: { email: { endsWith: `@${SEED_EMAIL_DOMAIN}` } } } },
+      ],
+    },
   });
   await prisma.session.deleteMany({
-    where: { helper: { email: { endsWith: `@${SEED_EMAIL_DOMAIN}` } } },
+    where: {
+      OR: [
+        { helper: { email: { endsWith: `@${SEED_EMAIL_DOMAIN}` } } },
+        { request: { user: { email: { endsWith: `@${SEED_EMAIL_DOMAIN}` } } } },
+      ],
+    },
   });
   await prisma.request.deleteMany({
     where: { user: { email: { endsWith: `@${SEED_EMAIL_DOMAIN}` } } },
@@ -116,23 +275,48 @@ async function main() {
   const password = await bcrypt.hash(SEED_PASSWORD, 10);
 
   await prisma.user.createMany({
-    data: Array.from({ length: USER_COUNT }, (_, index) => ({
-      email: seedEmail(index + 1),
-      password,
-      name: displayName(index + 1),
-      role: Role.USER,
-      verificationStatus: VerificationStatus.VERIFIED,
-      verificationProvider: 'stub',
-      verifiedAt: new Date(),
-    })),
+    data: [
+      {
+        email: `admin@${SEED_EMAIL_DOMAIN}`,
+        password,
+        name: 'Pulse Admin',
+        role: Role.ADMIN,
+        verificationStatus: VerificationStatus.VERIFIED,
+        verificationProvider: 'stub',
+        verifiedAt: new Date(),
+      },
+      {
+        email: `moderator@${SEED_EMAIL_DOMAIN}`,
+        password,
+        name: 'Pulse Moderator',
+        role: Role.MODERATOR,
+        verificationStatus: VerificationStatus.VERIFIED,
+        verificationProvider: 'stub',
+        verifiedAt: new Date(),
+      },
+      ...Array.from({ length: USER_COUNT }, (_, index) => ({
+        email: seedEmail(index + 1),
+        password,
+        name: displayName(index + 1),
+        role: Role.USER,
+        verificationStatus: VerificationStatus.VERIFIED,
+        verificationProvider: 'stub',
+        verifiedAt: new Date(),
+      })),
+    ],
   });
 
   const users = await prisma.user.findMany({
-    where: { email: { endsWith: `@${SEED_EMAIL_DOMAIN}` } },
+    where: {
+      email: { endsWith: `@${SEED_EMAIL_DOMAIN}` },
+      role: Role.USER,
+    },
     select: { id: true },
   });
 
-  const cityCounts = new Map<string, number>(CITIES.map((city) => [city.name, 0]));
+  const cityCounts = new Map<string, number>(
+    CITIES.map((city) => [city.name, 0]),
+  );
 
   await prisma.request.createMany({
     data: Array.from({ length: REQUEST_COUNT }, () => {
@@ -157,6 +341,56 @@ async function main() {
     }),
   });
 
+  let rejected = await prisma.request.findMany({
+    where: {
+      user: { email: { endsWith: `@${SEED_EMAIL_DOMAIN}` } },
+      status: RequestStatus.REJECTED,
+    },
+    take: 8,
+  });
+
+  if (rejected.length === 0) {
+    const owner = pick(users);
+    const location = offsetAround(CITIES[0]);
+    const approx = approximateLocation(location.lat, location.lng);
+    const created = await prisma.request.create({
+      data: {
+        title: 'Need a grocery run this afternoon',
+        description: 'Could use a hand picking up a few essentials.',
+        category: 'groceries',
+        status: RequestStatus.REJECTED,
+        urgency: RequestUrgency.MEDIUM,
+        lat: location.lat,
+        lng: location.lng,
+        geoHashApprox: approx.geoHashApprox,
+        approxLat: approx.approxLat,
+        approxLng: approx.approxLng,
+        userId: owner.id,
+      },
+    });
+    rejected = [created];
+  }
+
+  for (const request of rejected) {
+    await prisma.safetyIncident.create({
+      data: {
+        userId: request.userId,
+        source: SafetyIncidentSource.REQUEST_VETTING,
+        reasonCode: 'RESTRICTED_CONTENT',
+        triggeredRule: 'Stage 1: Restricted keyword (money)',
+        detailsRedacted: 'Seeded rejection for Pulse queue.',
+        requestId: request.id,
+      },
+    });
+    await prisma.appeal.create({
+      data: {
+        requestId: request.id,
+        userId: request.userId,
+        reason: 'This was a genuine request for help nearby.',
+      },
+    });
+  }
+
   const approved = await prisma.request.count({
     where: {
       user: { email: { endsWith: `@${SEED_EMAIL_DOMAIN}` } },
@@ -164,8 +398,16 @@ async function main() {
     },
   });
 
-  console.log(`Created ${USER_COUNT} users with display names only (login: ${SEED_PASSWORD})`);
-  console.log(`Created ${REQUEST_COUNT} requests (${approved} approved), snapped to geohash-6 cells`);
+  console.log(
+    `Created ${USER_COUNT} users with display names only (login: ${SEED_PASSWORD})`,
+  );
+  console.log(
+    `Pulse staff: admin@${SEED_EMAIL_DOMAIN} / moderator@${SEED_EMAIL_DOMAIN} (${SEED_PASSWORD})`,
+  );
+  console.log(
+    `Created ${REQUEST_COUNT} requests (${approved} approved), snapped to geohash-6 cells`,
+  );
+  console.log(`Opened ${rejected.length} vetting appeals for Pulse review`);
   for (const [city, count] of cityCounts) {
     console.log(`  ${city}: ${count} requests`);
   }

@@ -8,7 +8,7 @@ import {
   type Helpline,
   type Stage1Match,
 } from './stage1-filters';
-import { ContentRiskClassifier, IntentAnalyzer } from './vetting-providers';
+import type { ContentRiskClassifier, IntentAnalyzer } from './vetting-providers';
 
 export type VettingResult = {
   status: RequestStatus;

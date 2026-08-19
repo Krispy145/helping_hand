@@ -5,8 +5,8 @@ import 'package:ui/ui.dart';
 
 import '../../../router.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../data/chat_models.dart';
 import '../data/chat_repository.dart';
+import 'chat_widgets.dart';
 
 class ChatsScreen extends ConsumerWidget {
   const ChatsScreen({super.key});
@@ -17,8 +17,9 @@ class ChatsScreen extends ConsumerWidget {
     final userId = ref.watch(authProvider).value?.id;
 
     return Scaffold(
+      backgroundColor: context.background,
       appBar: AppBar(
-        title: const Text('Chats'),
+        title: const Text('Conversations'),
         centerTitle: true,
         actions: [
           IconButton(
@@ -32,10 +33,13 @@ class ChatsScreen extends ConsumerWidget {
         data: (chats) {
           if (chats.isEmpty) {
             return Center(
-              child: Text(
-                'No current chats.\nOffer help on a request to start one.',
-                textAlign: TextAlign.center,
-                style: context.bodyLarge.copyWith(color: context.textSecondary),
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text(
+                  'When you offer or receive help, conversations will show up here.',
+                  textAlign: TextAlign.center,
+                  style: context.bodyLarge.copyWith(color: context.textSecondary),
+                ),
               ),
             );
           }
@@ -45,44 +49,21 @@ class ChatsScreen extends ConsumerWidget {
             itemCount: chats.length,
             itemBuilder: (context, index) {
               final chat = chats[index];
-              return _ChatTile(chat: chat, currentUserId: userId);
+              return ChatSessionTile(
+                chat: chat,
+                currentUserId: userId,
+                onTap: () => context.push('/session/${chat.id}'),
+              );
             },
           );
         },
         loading: () => const Center(child: BreathingLoader()),
-        error: (error, _) => Center(child: Text('Could not load chats: $error')),
-      ),
-    );
-  }
-}
-
-class _ChatTile extends StatelessWidget {
-  const _ChatTile({required this.chat, required this.currentUserId});
-
-  final ChatSessionDetails chat;
-  final String? currentUserId;
-
-  @override
-  Widget build(BuildContext context) {
-    final otherName = chat.otherPartyName(currentUserId);
-    final roleLabel = currentUserId == chat.helperId ? 'Helping' : 'Your request';
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: context.surfaceVariant,
-          child: Icon(Icons.chat_bubble, color: context.textPrimary),
+        error: (error, _) => Center(
+          child: Text(
+            'Could not load conversations.',
+            style: context.bodyLarge.copyWith(color: context.error),
+          ),
         ),
-        title: Text(otherName, style: context.h3),
-        subtitle: Text(
-          '${chat.request.title}\n$roleLabel · Busy',
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-        isThreeLine: true,
-        trailing: Icon(Icons.chevron_right, color: context.textSecondary),
-        onTap: () => context.push('/session/${chat.id}'),
       ),
     );
   }

@@ -96,6 +96,19 @@ class ChatSessionDetails {
     return currentUserId == helperId ? requester.id : helperId;
   }
 
+  String roleLabel(String? currentUserId) {
+    return currentUserId == helperId ? 'Offering help' : 'Your request';
+  }
+
+  String get statusLabel {
+    return switch (status) {
+      'ACTIVE' => 'In progress',
+      'COMPLETED' => 'Completed',
+      'DISPUTED' => 'Ended after a report',
+      _ => 'Ended',
+    };
+  }
+
   bool get isActive => status == 'ACTIVE';
 }
 

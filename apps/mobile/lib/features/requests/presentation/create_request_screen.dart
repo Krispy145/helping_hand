@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:map/map.dart';
 import 'package:models/models.dart';
 
+import '../../urgent_help/presentation/get_urgent_help_button.dart';
 import '../../verification/presentation/verification_gate.dart';
 import '../providers/request_provider.dart';
 
@@ -130,6 +131,8 @@ class _CreateRequestScreenState extends ConsumerState<CreateRequestScreen> {
           key: _formKey,
           child: ListView(
             children: [
+              const GetUrgentHelpButton(),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _titleController,
                 decoration: const InputDecoration(labelText: 'Title'),

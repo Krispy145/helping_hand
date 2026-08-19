@@ -8,6 +8,7 @@ import '../../../router.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../reports/presentation/report_entry.dart';
 import '../../requests/providers/request_provider.dart';
+import '../../urgent_help/presentation/get_urgent_help_button.dart';
 import '../application/chat_provider.dart';
 import '../data/chat_repository.dart';
 
@@ -139,6 +140,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         centerTitle: true,
         actions: [
           IconButton(
+            tooltip: 'Get urgent help',
+            onPressed: () => context.push(AppRoutes.urgentHelp),
+            icon: Icon(Icons.health_and_safety_outlined, color: context.error),
+          ),
+          IconButton(
             tooltip: 'Report',
             onPressed: _openReport,
             icon: Icon(Icons.flag_outlined, color: context.error),
@@ -229,6 +235,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       ],
                     ),
                     const SizedBox(height: 8),
+                    const GetUrgentHelpButton(compact: true),
                     TextButton(
                       onPressed: _busy ? null : _openReport,
                       child: Text('Report a concern', style: TextStyle(color: context.error)),
@@ -247,6 +254,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         textAlign: TextAlign.center,
                       ),
                     ),
+                    const GetUrgentHelpButton(compact: true),
                     TextButton(
                       onPressed: _busy ? null : _openReport,
                       child: Text('Report a concern', style: TextStyle(color: context.error)),

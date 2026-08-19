@@ -6,6 +6,7 @@ import 'package:ui/ui.dart';
 
 import '../../chat/data/chat_repository.dart';
 import '../../requests/providers/request_provider.dart';
+import '../../urgent_help/presentation/get_urgent_help_button.dart';
 import '../data/report_repository.dart';
 import 'report_entry.dart';
 
@@ -160,6 +161,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
             'If you are in danger, contact local emergency services. Helping Hand is not an emergency service.',
             style: context.bodySmall,
           ),
+          const SizedBox(height: 12),
+          const GetUrgentHelpButton(),
           if (report.type.isVictimHarm) ...[
             const SizedBox(height: 12),
             Text('This does not penalize you for being harmed.', style: context.bodySmall),

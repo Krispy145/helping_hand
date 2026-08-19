@@ -32,15 +32,26 @@ class SettingsScreen extends ConsumerWidget {
             const SizedBox(height: 32),
             _buildSectionHeader(context, 'Safety'),
             Card(
-              child: ListTile(
-                title: const Text('Identity check'),
-                subtitle: Text(
-                  isVerifiedAdult(ref.watch(authProvider).asData?.value)
-                      ? 'Verified adult'
-                      : 'Required before asking for or offering help',
-                ),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () => context.push(AppRoutes.verification),
+              child: Column(
+                children: [
+                  ListTile(
+                    title: const Text('Get urgent help'),
+                    subtitle: const Text('Emergency, helplines, and official reporting routes'),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: () => context.push(AppRoutes.urgentHelp),
+                  ),
+                  const Divider(height: 1),
+                  ListTile(
+                    title: const Text('Identity check'),
+                    subtitle: Text(
+                      isVerifiedAdult(ref.watch(authProvider).asData?.value)
+                          ? 'Verified adult'
+                          : 'Required before asking for or offering help',
+                    ),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: () => context.push(AppRoutes.verification),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 32),

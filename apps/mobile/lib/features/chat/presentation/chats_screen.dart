@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ui/ui.dart';
 
+import '../../../router.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/chat_models.dart';
 import '../data/chat_repository.dart';
@@ -16,7 +17,17 @@ class ChatsScreen extends ConsumerWidget {
     final userId = ref.watch(authProvider).value?.id;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Chats'), centerTitle: true),
+      appBar: AppBar(
+        title: const Text('Chats'),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            tooltip: 'Get urgent help',
+            onPressed: () => context.push(AppRoutes.urgentHelp),
+            icon: Icon(Icons.health_and_safety_outlined, color: context.error),
+          ),
+        ],
+      ),
       body: chatsAsync.when(
         data: (chats) {
           if (chats.isEmpty) {

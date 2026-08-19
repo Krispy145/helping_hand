@@ -13,16 +13,16 @@ This document outlines the testing protocols and release preparation steps for t
 - **Naming**: `*.spec.ts`.
 - **Coverage**:
     - `VettingService`: Keyword filtering (Done).
-    - `AuthService`: Token generation, hashing.
-    - `RequestsService`: CRUD logic (Mocking Prisma).
+    - `AuthService`: Token generation, hashing (Done).
+    - `RequestsService`: CRUD logic (Mocking Prisma) (Done).
 
 #### 2. Integration Tests
 - **Scope**: Controller + Service + Database (In-Memory or Test Container).
 - **Tools**: Jest + Supertest.
 - **Key Flows**:
-    - `POST /auth/login` -> Get Token.
-    - `POST /requests` (Authorized) -> 201 Created.
-    - `GET /requests/nearby` -> Returns valid data types.
+    - `POST /auth/login` -> Get Token (Done).
+    - `POST /requests` (Authorized) -> 201 Created (Done; mocked persistence).
+    - `GET /requests/nearby` -> Returns valid data types (Done; public approx coords).
 
 #### 3. E2E Tests
 - **Scope**: Full application flow.
@@ -43,8 +43,8 @@ This document outlines the testing protocols and release preparation steps for t
 - **Scope**: Individual Screens and Components.
 - **Tools**: `flutter_test`.
 - **Coverage**:
-    - `CreateRequestScreen`: Form validation errors show up.
-    - `FeedScreen`: Loading spinner appears, then list.
+    - `CreateRequestScreen`: Form validation errors show up (Done).
+    - `FeedScreen`: Loading spinner appears, then list (Done).
 
 #### 3. Integration/Golden Tests
 - **Scope**: Visual regression and flow.
@@ -75,4 +75,6 @@ This document outlines the testing protocols and release preparation steps for t
 - [x] Request Feature Implementation
 - [x] Vetting Logic (Unit Tested)
 - [x] Discovery Feed
-- [ ] Full Coverage (Integration/E2E Pending)
+- [x] Auth + request HTTP tests (mocked persistence)
+- [x] Create-request / feed widget tests
+- [ ] Full Coverage (E2E against a live database still pending)

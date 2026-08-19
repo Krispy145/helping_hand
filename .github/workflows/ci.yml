@@ -10,6 +10,9 @@ jobs:
   backend-check:
     name: "Backend (Apps/API)"
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ci
+      JWT_SECRET: ci_test_secret
     defaults:
       run:
         working-directory: ./apps/api
@@ -63,6 +66,8 @@ jobs:
         run: |
           cd ../../packages/models && flutter pub get
           cd ../ui && flutter pub get
+          cd ../utils && flutter pub get
+          cd ../map && flutter pub get
 
       - name: Install Dependencies
         run: flutter pub get

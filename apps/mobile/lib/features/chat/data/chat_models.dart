@@ -88,7 +88,8 @@ class ChatSessionDetails {
 
   String otherPartyName(String? currentUserId) {
     final other = currentUserId == helperId ? requester : helper;
-    return other.name?.trim().isNotEmpty == true ? other.name! : 'Helper';
+    final name = other.name?.trim();
+    return (name != null && name.isNotEmpty) ? name : 'Helper';
   }
 
   String otherPartyId(String? currentUserId) {

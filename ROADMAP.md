@@ -24,20 +24,20 @@ This document tracks the high-level progress of the Helping Hand project.
 
 ### **1. UI/UX Refinement (Mobile)**
 *Goal: Align with "Calm, Dignified, Human" design principles.*
-- [ ] **Theme Update:** Soft color palette, premium typography (Google Fonts).
+- [x] **Theme Update:** Soft color palette, premium typography (Google Fonts).
 - [ ] **Interaction Design:** Smooth transitions, "deep breath" pacing.
 - [ ] **Component Polish:** "Dignified" cards for Requests, minimalist inputs.
 
 ### **2. Web Pulse Dashboard (MVP)**
 *Goal: A calm monitoring interface for admins.*
-- [ ] **Setup:** Web-optimized Navigation & Layout.
-- [ ] **Auth:** Web Persistence & Login Screen.
-- [ ] **Vetting Queue:** Interface to approve/reject requests.
+- [x] **Setup:** Web-optimized Navigation & Layout.
+- [x] **Auth:** Web Persistence & Login Screen.
+- [x] **Vetting Queue:** Interface to approve/reject requests.
 
 ### **3. Map Feature (Home View) 🗺️**
 *Goal: Visual discovery of helpers using OpenStreetMap.*
-- [ ] **Map Package:** Create `packages/map` with Riverpod Clean Arch.
-- [ ] **Integration:** Replace Home Screen list with Map View.
+- [x] **Map Package:** Create `packages/map` with Riverpod Clean Arch.
+- [x] **Integration:** Replace Home Screen list with Map View.
 
 ### **4. Auth & Onboarding 👤**
 *Goal: Smooth, private, and helpful entry.*
@@ -63,7 +63,7 @@ This document tracks the high-level progress of the Helping Hand project.
 
 ## Phase 4: Refinement & Testing (v0.4.0)
 - [ ] **Code Quality**: Resolve Lint Warnings.
-- [ ] **Testing**: Integration Tests for Auth & Requests.
+- [x] **Testing**: Integration Tests for Auth & Requests.
 
 ---
 

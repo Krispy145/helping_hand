@@ -28,9 +28,8 @@ void main() {
     );
     await tester.pump(const Duration(seconds: 2));
 
-    // Verify that Login Screen is shown.
-    expect(find.text('Login'), findsOneWidget); // AppBar title
-    expect(find.text('Email'), findsOneWidget); // Email field
-    expect(find.text('Password'), findsOneWidget); // Password field
+    expect(find.text('Welcome Back'), findsOneWidget);
+    expect(find.text('Email'), findsOneWidget);
+    expect(find.text('Password'), findsOneWidget);
   });
 }

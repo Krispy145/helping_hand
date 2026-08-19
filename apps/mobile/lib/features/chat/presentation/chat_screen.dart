@@ -216,7 +216,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: Column(
                 children: [
-                  if (sessionAsync.asData?.value.isActive == true) ...[
+                  if (sessionAsync.asData?.value.isActive ?? false) ...[
                     Row(
                       children: [
                         Expanded(
@@ -272,7 +272,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           ),
                           child: TextField(
                             controller: _controller,
-                            enabled: sessionAsync.asData?.value.isActive != false && !_busy,
+                            enabled: (sessionAsync.asData?.value.isActive ?? true) && !_busy,
                             style: context.bodyLarge,
                             decoration: InputDecoration(
                               hintText: 'Type a message...',

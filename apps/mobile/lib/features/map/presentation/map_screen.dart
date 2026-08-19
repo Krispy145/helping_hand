@@ -190,7 +190,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     if (boundsKey == _lastBoundsKey) return;
     _lastBoundsKey = boundsKey;
 
-    ref.read(logic.mapControllerProvider.notifier).setSearching(true);
+    await ref.read(logic.mapControllerProvider.notifier).setSearching(true);
     try {
       await ref.read(nearbyRequestsProvider.notifier).refresh(bounds: bounds);
     } finally {

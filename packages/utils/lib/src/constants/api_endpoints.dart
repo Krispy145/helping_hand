@@ -15,6 +15,9 @@ class ApiEndpoints {
   static const String reportsMine = '/reports/mine';
   static const String verificationStatus = '/verification/status';
   static const String verificationStart = '/verification/start';
+  static const String verificationDocument = '/verification/document';
+  static const String verificationRefresh = '/verification/refresh';
+  static const String verificationEligibility = '/verification/eligibility';
   static const String verificationStubComplete = '/verification/stub-complete';
   static const String publicPulseSummary = '/public/pulse/summary';
   static const String pulseQueue = '/pulse/queue';

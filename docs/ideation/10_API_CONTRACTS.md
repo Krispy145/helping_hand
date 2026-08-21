@@ -11,8 +11,12 @@ This file describes *intentional* contracts, not a specific framework.
 
 ## Verification
 - POST /verification/start
+- POST /verification/document
+- POST /verification/refresh
+- POST /verification/eligibility
 - POST /verification/webhook (provider → backend)
 - GET  /verification/status
+- POST /verification/stub-complete (non-production stub only)
 
 ## Availability
 - POST /availability/start

@@ -21,6 +21,7 @@ enum VerificationStatus {
   PENDING
   VERIFIED
   FAILED
+  REQUIRES_DOCUMENT
 }
 
 enum VerificationFailureReason {
@@ -40,11 +41,13 @@ model User {
   verificationProviderRef    String?                     @unique
   verifiedAt                 DateTime?
   verificationFailureReason  VerificationFailureReason?
+  ageThreshold               Int?
   createdAt                  DateTime                    @default(now())
   updatedAt                  DateTime                    @updatedAt
 
   @@index([verificationStatus])
 
+  verificationAttempts AgeVerificationAttempt[]
   requests       Request[]
   helperSessions Session[] @relation("HelperSessions")
   messages       Message[]
@@ -230,6 +233,34 @@ model Appeal {
   updatedAt  DateTime     @updatedAt
 
   @@index([status, createdAt])
+}
+
+model AgeVerificationAttempt {
+  id                String                      @id @default(uuid())
+  userId            String
+  user              User                        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider          String
+  providerSessionId String                      @unique
+  status            VerificationStatus          @default(PENDING)
+  ageThreshold      Int
+  method            String?
+  failureReason     VerificationFailureReason?
+  createdAt         DateTime                    @default(now())
+  updatedAt         DateTime                    @updatedAt
+  verifiedAt        DateTime?
+  expiresAt         DateTime?
+  notifications     AgeVerificationNotification[]
+
+  @@index([userId, createdAt])
+  @@index([status])
+}
+
+model AgeVerificationNotification {
+  id          String                 @id
+  attemptId   String
+  attempt     AgeVerificationAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  state       String
+  processedAt DateTime               @default(now())
 }
 
 model DeviceToken {

@@ -19,13 +19,14 @@ This project is a Monorepo containing:
 ### Backend
 1.  Navigate to `apps/api`.
 2.  Install dependencies: `npm install`.
-3.  Start Docker services: `docker-compose up -d` (from root).
-4.  Initialize Database:
+3.  Copy `apps/api/.env.example` to `apps/api/.env` and set `DATABASE_URL` / `JWT_SECRET`. Leave `YOTI_SDK_ID` and `YOTI_API_KEY` empty to use the **local age-verification stub** (Yoti is not called). See [Age Verification](AGE_VERIFICATION.md).
+4.  Start Docker services: `docker-compose up -d` (from root).
+5.  Initialize Database:
     ```bash
     npx prisma migrate dev
     npx prisma generate
     ```
-5.  Start Server: `npm run start:dev`.
+6.  Start Server: `npm run start:dev`.
 
 ### Frontend
 1.  Navigate to `apps/mobile`.

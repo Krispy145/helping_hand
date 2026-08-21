@@ -36,16 +36,18 @@ class SettingsScreen extends ConsumerWidget {
                 children: [
                   ListTile(
                     title: const Text('Get urgent help'),
-                    subtitle: const Text('Emergency, helplines, and official reporting routes'),
+                    subtitle: const Text(
+                      'Emergency, helplines, and official reporting routes',
+                    ),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () => context.push(AppRoutes.urgentHelp),
                   ),
                   const Divider(height: 1),
                   ListTile(
-                    title: const Text('Identity check'),
+                    title: const Text('Age verification'),
                     subtitle: Text(
                       isVerifiedAdult(ref.watch(authProvider).asData?.value)
-                          ? 'Verified adult'
+                          ? 'Verified'
                           : 'Required before asking for or offering help',
                     ),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
@@ -63,19 +65,22 @@ class SettingsScreen extends ConsumerWidget {
                     title: Text(t.strings.settings.theme.system),
                     value: ThemeMode.system,
                     groupValue: themeMode,
-                    onChanged: (val) => ref.read(appThemeProvider.notifier).setMode(val!),
+                    onChanged: (val) =>
+                        ref.read(appThemeProvider.notifier).setMode(val!),
                   ),
                   RadioListTile<ThemeMode>(
                     title: Text(t.strings.settings.theme.light),
                     value: ThemeMode.light,
                     groupValue: themeMode,
-                    onChanged: (val) => ref.read(appThemeProvider.notifier).setMode(val!),
+                    onChanged: (val) =>
+                        ref.read(appThemeProvider.notifier).setMode(val!),
                   ),
                   RadioListTile<ThemeMode>(
                     title: Text(t.strings.settings.theme.dark),
                     value: ThemeMode.dark,
                     groupValue: themeMode,
-                    onChanged: (val) => ref.read(appThemeProvider.notifier).setMode(val!),
+                    onChanged: (val) =>
+                        ref.read(appThemeProvider.notifier).setMode(val!),
                   ),
                 ],
               ),
@@ -88,8 +93,11 @@ class SettingsScreen extends ConsumerWidget {
                   _PermissionTile(
                     title: t.strings.settings.permissions.location,
                     status: state.location,
-                    onTap: () => controller.handlePermission(Permission.locationWhenInUse),
-                    openSettingsLabel: t.strings.settings.permissions.openSettings,
+                    onTap: () => controller.handlePermission(
+                      Permission.locationWhenInUse,
+                    ),
+                    openSettingsLabel:
+                        t.strings.settings.permissions.openSettings,
                     allowedLabel: t.strings.settings.permissions.allowed,
                     deniedLabel: t.strings.settings.permissions.denied,
                   ),
@@ -97,8 +105,10 @@ class SettingsScreen extends ConsumerWidget {
                   _PermissionTile(
                     title: t.strings.settings.permissions.notifications,
                     status: state.notification,
-                    onTap: () => controller.handlePermission(Permission.notification),
-                    openSettingsLabel: t.strings.settings.permissions.openSettings,
+                    onTap: () =>
+                        controller.handlePermission(Permission.notification),
+                    openSettingsLabel:
+                        t.strings.settings.permissions.openSettings,
                     allowedLabel: t.strings.settings.permissions.allowed,
                     deniedLabel: t.strings.settings.permissions.denied,
                   ),
@@ -107,7 +117,8 @@ class SettingsScreen extends ConsumerWidget {
                     title: t.strings.settings.permissions.camera,
                     status: state.camera,
                     onTap: () => controller.handlePermission(Permission.camera),
-                    openSettingsLabel: t.strings.settings.permissions.openSettings,
+                    openSettingsLabel:
+                        t.strings.settings.permissions.openSettings,
                     allowedLabel: t.strings.settings.permissions.allowed,
                     deniedLabel: t.strings.settings.permissions.denied,
                   ),
@@ -123,9 +134,14 @@ class SettingsScreen extends ConsumerWidget {
                     context: context,
                     builder: (context) => AlertDialog(
                       title: const Text('Logout'),
-                      content: const Text('Are you sure you want to log out? This will clear your session and local data.'),
+                      content: const Text(
+                        'Are you sure you want to log out? This will clear your session and local data.',
+                      ),
                       actions: [
-                        TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: const Text('Cancel'),
+                        ),
                         TextButton(
                           onPressed: () async {
                             Navigator.of(context).pop(); // Close dialog
@@ -134,7 +150,12 @@ class SettingsScreen extends ConsumerWidget {
                               context.go(AppRoutes.login);
                             }
                           },
-                          child: Text('Logout', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                          child: Text(
+                            'Logout',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -156,7 +177,10 @@ class SettingsScreen extends ConsumerWidget {
         alignment: Alignment.centerLeft,
         child: Text(
           title,
-          style: context.bodySmall.copyWith(fontWeight: FontWeight.bold, color: context.textSecondary),
+          style: context.bodySmall.copyWith(
+            fontWeight: FontWeight.bold,
+            color: context.textSecondary,
+          ),
         ),
       ),
     );
@@ -171,7 +195,14 @@ class _PermissionTile extends StatelessWidget {
   final String allowedLabel;
   final String deniedLabel;
 
-  const _PermissionTile({required this.title, required this.status, required this.onTap, required this.openSettingsLabel, required this.allowedLabel, required this.deniedLabel});
+  const _PermissionTile({
+    required this.title,
+    required this.status,
+    required this.onTap,
+    required this.openSettingsLabel,
+    required this.allowedLabel,
+    required this.deniedLabel,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -186,9 +217,15 @@ class _PermissionTile extends StatelessWidget {
           ? TextOutlineButton(label: openSettingsLabel)
           : const Icon(Icons.arrow_forward_ios, size: 16),
       subtitle: isGranted
-          ? Text(allowedLabel, style: TextStyle(color: context.success, fontSize: 12))
+          ? Text(
+              allowedLabel,
+              style: TextStyle(color: context.success, fontSize: 12),
+            )
           : isPermaDenied
-          ? Text(deniedLabel, style: TextStyle(color: context.error, fontSize: 12))
+          ? Text(
+              deniedLabel,
+              style: TextStyle(color: context.error, fontSize: 12),
+            )
           : null,
       onTap: onTap,
     );
@@ -209,7 +246,11 @@ class TextOutlineButton extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(fontSize: 10, color: context.primary, fontWeight: FontWeight.bold),
+        style: TextStyle(
+          fontSize: 10,
+          color: context.primary,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }

@@ -6,6 +6,7 @@ type PublicUserSource = {
   verificationStatus?: string | null;
   verifiedAt?: Date | null;
   verificationFailureReason?: string | null;
+  ageThreshold?: number | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -39,6 +40,9 @@ export function toPublicUser(
     verified_at: options?.includeEmail ? (user.verifiedAt ?? null) : undefined,
     verification_failure_reason: options?.includeEmail
       ? (user.verificationFailureReason ?? null)
+      : undefined,
+    age_threshold: options?.includeEmail
+      ? (user.ageThreshold ?? undefined)
       : undefined,
     created_at: user.createdAt,
     updated_at: user.updatedAt,

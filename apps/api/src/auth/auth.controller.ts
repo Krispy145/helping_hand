@@ -1,8 +1,21 @@
-import { Controller, Post, Get, Body, UnauthorizedException, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  UnauthorizedException,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginRequestDto } from './dto/login-request.dto';
 import { RegisterRequestDto } from './dto/register-request.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { toPublicUser } from '../common/public-serializers';
 
@@ -38,7 +51,7 @@ export class AuthController {
   @Get('me')
   @ApiOperation({ summary: 'Get current user profile' })
   @ApiResponse({ status: 200, description: 'Return current user profile' })
-  async getProfile(@Request() req: any) {
+  async getProfile(@Request() req: { user: { userId: string } }) {
     // req.user is populated by JwtStrategy (userId, email, role)
     const user = await this.authService.getUserById(req.user.userId);
     if (!user) {

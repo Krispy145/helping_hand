@@ -3,11 +3,7 @@ import 'package:dart_mappable/dart_mappable.dart';
 part 'user_dto.mapper.dart';
 
 @MappableEnum()
-enum UserRoleDto {
-  USER,
-  ADMIN,
-  MODERATOR,
-}
+enum UserRoleDto { USER, ADMIN, MODERATOR }
 
 @MappableEnum()
 enum VerificationStatusDto {
@@ -15,14 +11,11 @@ enum VerificationStatusDto {
   PENDING,
   VERIFIED,
   FAILED,
+  REQUIRES_DOCUMENT,
 }
 
 @MappableEnum()
-enum VerificationFailureReasonDto {
-  UNDERAGE,
-  PROVIDER_REJECTED,
-  EXPIRED,
-}
+enum VerificationFailureReasonDto { UNDERAGE, PROVIDER_REJECTED, EXPIRED }
 
 @MappableClass()
 class UserDto with UserDtoMappable {
@@ -33,6 +26,7 @@ class UserDto with UserDtoMappable {
   final VerificationStatusDto verificationStatus;
   final DateTime? verifiedAt;
   final VerificationFailureReasonDto? verificationFailureReason;
+  final int? ageThreshold;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -44,9 +38,11 @@ class UserDto with UserDtoMappable {
     this.verificationStatus = VerificationStatusDto.UNVERIFIED,
     this.verifiedAt,
     this.verificationFailureReason,
+    this.ageThreshold,
     required this.createdAt,
     required this.updatedAt,
   });
 
-  bool get canParticipate => verificationStatus == VerificationStatusDto.VERIFIED;
+  bool get canParticipate =>
+      verificationStatus == VerificationStatusDto.VERIFIED;
 }

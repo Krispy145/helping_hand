@@ -14,6 +14,8 @@ final verificationRepositoryProvider = Provider<VerificationRepository>((ref) {
 
 bool isVerifiedAdult(UserDto? user) => user?.canParticipate ?? false;
 
+int minimumUserAge(UserDto? user) => user?.ageThreshold ?? 18;
+
 Future<bool> ensureVerifiedAdult(BuildContext context, WidgetRef ref) async {
   if (isVerifiedAdult(ref.read(authProvider).asData?.value)) return true;
   if (!context.mounted) return false;

@@ -66,6 +66,7 @@ export class PrismaUserRepository implements IUserRepository {
       verificationProviderRef: prismaUser.verificationProviderRef,
       verifiedAt: prismaUser.verifiedAt,
       verificationFailureReason: prismaUser.verificationFailureReason,
+      ageThreshold: prismaUser.ageThreshold,
       createdAt: prismaUser.createdAt,
       updatedAt: prismaUser.updatedAt,
     });

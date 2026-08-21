@@ -284,6 +284,7 @@ async function main() {
         verificationStatus: VerificationStatus.VERIFIED,
         verificationProvider: 'stub',
         verifiedAt: new Date(),
+        ageThreshold: 18,
       },
       {
         email: `moderator@${SEED_EMAIL_DOMAIN}`,
@@ -293,6 +294,7 @@ async function main() {
         verificationStatus: VerificationStatus.VERIFIED,
         verificationProvider: 'stub',
         verifiedAt: new Date(),
+        ageThreshold: 18,
       },
       ...Array.from({ length: USER_COUNT }, (_, index) => ({
         email: seedEmail(index + 1),
@@ -302,6 +304,7 @@ async function main() {
         verificationStatus: VerificationStatus.VERIFIED,
         verificationProvider: 'stub',
         verifiedAt: new Date(),
+        ageThreshold: 18,
       })),
     ],
   });

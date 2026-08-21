@@ -15,6 +15,7 @@ export class User {
   verificationProviderRef?: string | null;
   verifiedAt?: Date | null;
   verificationFailureReason?: string | null;
+  ageThreshold?: number | null;
   createdAt: Date;
   updatedAt: Date;
 

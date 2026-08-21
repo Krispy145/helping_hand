@@ -85,6 +85,8 @@ class VerificationStatusDtoMapper extends EnumMapper<VerificationStatusDto> {
         return VerificationStatusDto.VERIFIED;
       case r'FAILED':
         return VerificationStatusDto.FAILED;
+      case r'REQUIRES_DOCUMENT':
+        return VerificationStatusDto.REQUIRES_DOCUMENT;
       default:
         throw MapperException.unknownEnumValue(value);
     }
@@ -101,6 +103,8 @@ class VerificationStatusDtoMapper extends EnumMapper<VerificationStatusDto> {
         return r'VERIFIED';
       case VerificationStatusDto.FAILED:
         return r'FAILED';
+      case VerificationStatusDto.REQUIRES_DOCUMENT:
+        return r'REQUIRES_DOCUMENT';
     }
   }
 }
@@ -223,6 +227,13 @@ class UserDtoMapper extends ClassMapperBase<UserDto> {
     key: r'verification_failure_reason',
     opt: true,
   );
+  static int? _$ageThreshold(UserDto v) => v.ageThreshold;
+  static const Field<UserDto, int> _f$ageThreshold = Field(
+    'ageThreshold',
+    _$ageThreshold,
+    key: r'age_threshold',
+    opt: true,
+  );
   static DateTime _$createdAt(UserDto v) => v.createdAt;
   static const Field<UserDto, DateTime> _f$createdAt = Field(
     'createdAt',
@@ -245,6 +256,7 @@ class UserDtoMapper extends ClassMapperBase<UserDto> {
     #verificationStatus: _f$verificationStatus,
     #verifiedAt: _f$verifiedAt,
     #verificationFailureReason: _f$verificationFailureReason,
+    #ageThreshold: _f$ageThreshold,
     #createdAt: _f$createdAt,
     #updatedAt: _f$updatedAt,
   };
@@ -258,6 +270,7 @@ class UserDtoMapper extends ClassMapperBase<UserDto> {
       verificationStatus: data.dec(_f$verificationStatus),
       verifiedAt: data.dec(_f$verifiedAt),
       verificationFailureReason: data.dec(_f$verificationFailureReason),
+      ageThreshold: data.dec(_f$ageThreshold),
       createdAt: data.dec(_f$createdAt),
       updatedAt: data.dec(_f$updatedAt),
     );
@@ -328,6 +341,7 @@ abstract class UserDtoCopyWith<$R, $In extends UserDto, $Out>
     VerificationStatusDto? verificationStatus,
     DateTime? verifiedAt,
     VerificationFailureReasonDto? verificationFailureReason,
+    int? ageThreshold,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -351,6 +365,7 @@ class _UserDtoCopyWithImpl<$R, $Out>
     VerificationStatusDto? verificationStatus,
     Object? verifiedAt = $none,
     Object? verificationFailureReason = $none,
+    Object? ageThreshold = $none,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => $apply(
@@ -363,6 +378,7 @@ class _UserDtoCopyWithImpl<$R, $Out>
       if (verifiedAt != $none) #verifiedAt: verifiedAt,
       if (verificationFailureReason != $none)
         #verificationFailureReason: verificationFailureReason,
+      if (ageThreshold != $none) #ageThreshold: ageThreshold,
       if (createdAt != null) #createdAt: createdAt,
       if (updatedAt != null) #updatedAt: updatedAt,
     }),
@@ -382,6 +398,7 @@ class _UserDtoCopyWithImpl<$R, $Out>
       #verificationFailureReason,
       or: $value.verificationFailureReason,
     ),
+    ageThreshold: data.get(#ageThreshold, or: $value.ageThreshold),
     createdAt: data.get(#createdAt, or: $value.createdAt),
     updatedAt: data.get(#updatedAt, or: $value.updatedAt),
   );
